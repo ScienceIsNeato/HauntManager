@@ -89,8 +89,7 @@ int main(int argc, char *argv[])
 	Scanner *scanner = new Scanner();
 	RPlidarDriver * drv = CreateDriver(); // create the driver instance - for some reason creating it in the Scanner class crashes the program
 
-	const char** dummy2;
-	if (!(scanner->Start(drv, 0, dummy2)))
+	if (!(scanner->Start(drv, NULL, NULL))) // Use default com path and baud rate
 	{
 		on_finished(drv, scanner);
 	}

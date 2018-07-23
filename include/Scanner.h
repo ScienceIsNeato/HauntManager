@@ -48,12 +48,12 @@ public:
 	// Cleanup
 	void Close(RPlidarDriver * drv);
 
-	bool Start(RPlidarDriver * drv, int argc, const char * argv[]);
+	bool Start(RPlidarDriver * drv, const char * com_path, const char * baud_rate);
 	void Stop(RPlidarDriver * drv);
 
 
 	// Set up the rplidar driver and initialize
-	bool Initialize(RPlidarDriver * drv, int argc, const char * argv[]);
+	bool Initialize(RPlidarDriver * drv, const char * com_path, const char * baud_rate);
 
 	// Get raw data of surroundings for a period of time and average them per angle measurement
 	void Calibrate(RPlidarDriver * drv, int num_samples, double (&calibration_results) [NUM_SAMPLE_POINTS]);

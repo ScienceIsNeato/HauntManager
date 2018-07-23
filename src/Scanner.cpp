@@ -8,7 +8,7 @@ Scanner::~Scanner()
 {
 }
 
-bool Scanner::Initialize(RPlidarDriver * drv, int argc, const char * argv[])
+bool Scanner::Initialize(RPlidarDriver * drv, const char * com_path, const char * baud_rate)
 {
 	const char * opt_com_path = NULL;
 	_u32         baudrateArray[2] = { 115200, 256000 };
@@ -21,12 +21,12 @@ bool Scanner::Initialize(RPlidarDriver * drv, int argc, const char * argv[])
 		"Version: 1.6.1\n");
 
 	// read serial port from the command line...
-	if (argc > 1) opt_com_path = argv[1]; // or set to a fixed value: e.g. "com3" 
+	if (com_path) opt_com_path = com_path; // or set to a fixed value: e.g. "com3" 
 
 	// read baud rate from the command line if specified...
-	if (argc > 2)
+	if (baud_rate)
 	{
-		opt_com_baudrate = strtoul(argv[2], NULL, 10);
+		opt_com_baudrate = strtoul(baud_rate, NULL, 10);
 		useArgcBaudrate = true;
 	}
 
@@ -243,9 +243,9 @@ void Scanner::SmoothCalibrationResults(double(&calibration_results)[NUM_SAMPLE_P
 	}
 }
 
-bool Scanner::Start(RPlidarDriver *drv, int argc, const char * argv[])
+bool Scanner::Start(RPlidarDriver *drv, const char * com_path, const char * baud_rate)
 {
-	if (!(Initialize(drv, argc, argv)) || (!CheckRPLIDARHealth(drv)))
+	if (!(Initialize(drv, com_path, baud_rate)) || (!CheckRPLIDARHealth(drv)))
 	{
 		return false;
 	}
@@ -278,23 +278,21 @@ ScanResult Scanner::Scan(RPlidarDriver * drv, double(calibration_values)[NUM_SAM
 		for (int pos = 0; pos < (int)count; ++pos)
 		{
 			double dist = nodes[pos].distance_q2 / 4.0f;
+			double angle = (nodes[pos].angle_q6_checkbit >> RPLIDAR_RESP_MEASUREMENT_ANGLE_SHIFT) / 64.0f;
+			if (!(ShouldProcess(angle, dist)))
+			{
+				// point is in a dead zone, continue
+				continue;
+			}
 			if ((dist > 0) &&
 				(dist < calibration_values[pos]) &&
-				(nodes[pos].sync_quality > 40) &&
-				ShouldProcess((nodes[pos].angle_q6_checkbit >> RPLIDAR_RESP_MEASUREMENT_ANGLE_SHIFT) / 64.0f, dist ) )
+				(nodes[pos].sync_quality > 40) )
 			{
 				ret_val.closest_distance = dist;
 				ret_val.closest_angle = (nodes[pos].angle_q6_checkbit >> RPLIDAR_RESP_MEASUREMENT_ANGLE_SHIFT) / 64.0f;
 				ret_val.closest_index = pos;
 				ret_val.valid = true;
-				//std::cout << "accepting b/c " << dist << " is less than " << calibration_values[pos] << " for " << shortest_angle << std::endl;
 			}
-
-			//printf("%s theta: %03.2f Dist: %08.2f Q: %d \n", 
-			//    (nodes[pos].sync_quality & RPLIDAR_RESP_MEASUREMENT_SYNCBIT) ?"S ":"  ", 
-			//    (nodes[pos].angle_q6_checkbit >> RPLIDAR_RESP_MEASUREMENT_ANGLE_SHIFT)/64.0f,
-			//    nodes[pos].distance_q2/4.0f,
-			//    nodes[pos].sync_quality >> RPLIDAR_RESP_MEASUREMENT_QUALITY_SHIFT);
 		}
 	}	
 	return ret_val;
