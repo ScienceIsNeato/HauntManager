@@ -32,7 +32,7 @@
  *
  */
 
-#include "arch_linux.h"
+#include "../../include/rplidar/arch_linux.h"
 
 namespace rp{ namespace arch{
 _u64 rp_getus()

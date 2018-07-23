@@ -32,8 +32,8 @@
  *
  */
 
-#include "sdkcommon.h"
-#include "thread.h"
-#include "thread.hpp"
+#include "../../include/rplidar/sdkcommon.h"
+#include "../../include/rplidar/thread.h"
+#include "../../include/rplidar/thread.hpp"
 
 
