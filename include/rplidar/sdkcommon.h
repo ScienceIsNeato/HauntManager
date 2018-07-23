@@ -37,7 +37,7 @@
 #elif defined(_MACOS)
 #include "arch/macOS/arch_macOS.h"
 #elif defined(__GNUC__)
-#include "../include/arch_linux.h"
+#include "arch_linux.h"
 #else
 #error "unsupported target"
 #endif

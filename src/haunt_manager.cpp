@@ -7,7 +7,7 @@
 #include <memory>
 #include "../include/pigpioServo.h"
 
-#include "../include/rplidar.h" //RPLIDAR standard sdk, all-in-one header
+#include "../include/rplidar/rplidar.h" //RPLIDAR standard sdk, all-in-one header
 #include "../include/Scanner.h"
 
 

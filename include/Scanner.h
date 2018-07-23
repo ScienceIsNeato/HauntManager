@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include "../include/rplidar.h" //RPLIDAR standard sdk, all-in-one header
+#include "../include/rplidar/rplidar.h" //RPLIDAR standard sdk, all-in-one header
 
 #define NUM_SAMPLE_POINTS 8192
 #define CALIBRATION_PNTS 50 // should make injectable

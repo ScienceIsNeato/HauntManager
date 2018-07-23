@@ -32,18 +32,17 @@
  *
  */
 
-#include "../include/sdkcommon.h"
-
-#include "../include/hal/abs_rxtx.h"
-#include "../include/hal/thread.h"
-#include "../include/hal/types.h"
-#include "../include/hal/assert.h"
-#include "../include/hal/locker.h"
-#include "../include/hal/socket.h"
-#include "../include/hal/event.h"
-#include "../include/rplidar_driver_impl.h"
-#include "../include/rplidar_driver_serial.h"
-#include "../include/rplidar_driver_TCP.h"
+#include "../../include/rplidar/sdkcommon.h"
+#include "../../include/rplidar/hal/abs_rxtx.h"
+#include "../../include/rplidar/hal/thread.h"
+#include "../../include/rplidar/hal/types.h"
+#include "../../include/rplidar/hal/assert.h"
+#include "../../include/rplidar/hal/locker.h"
+#include "../../include/rplidar/hal/socket.h"
+#include "../../include/rplidar/hal/event.h"
+#include "../../include/rplidar/rplidar_driver_impl.h"
+#include "../../include/rplidar/rplidar_driver_serial.h"
+#include "../../include/rplidar/rplidar_driver_TCP.h"
 
 #ifndef min
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
