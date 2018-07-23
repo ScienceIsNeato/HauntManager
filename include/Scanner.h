@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <vector>
 #include "../include/rplidar/rplidar.h" //RPLIDAR standard sdk, all-in-one header
 
 #define NUM_SAMPLE_POINTS 8192
@@ -22,6 +23,17 @@ struct ScanResult
 	double closest_distance;
 	int closest_index;
 	bool valid;
+};
+
+struct DeadZone
+{
+	// Ignore any measurements taken in this region. 
+	// Region looks like a wedge (i.e. pizza slice), defined by the start and end angles
+	// and may be cut horizontally by start and end distances
+	double start_angle;
+	double end_angle;
+	double start_distance; // mm
+	double end_distance; // mm
 };
 
 class Scanner
@@ -51,5 +63,14 @@ public:
 
 	// Get raw values for a single pass
 	ScanResult Scan(RPlidarDriver * drv, double(calibration_values)[NUM_SAMPLE_POINTS]);
+
+	// Return false if point is in a dead zone
+	bool ShouldProcess(double angle, double distance);
+
+	// Create a region for which measurements should be ignored
+	void AddDeadZone(DeadZone dead_zone);
+
+private:
+	std::vector<DeadZone> _dead_zones;
 };
 

@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 	offset.offsetY = 0;
 
 	std::shared_ptr<pigpioServo> servo = std::make_shared<pigpioServo>(gpio_pin, angle_maps, offset);
-	
+
 	double calibration_values[NUM_SAMPLE_POINTS];
 	signal(SIGINT, ctrlc); // set signal handler for control c
 	Scanner *scanner = new Scanner();
@@ -96,6 +96,12 @@ int main(int argc, char *argv[])
 	}
 
 	scanner->Calibrate(drv, CALIBRATION_PNTS, calibration_values);
+
+	// We want to ignore anything behind the scanner in this demo - servo can't turn that way anyway
+	DeadZone dz1 = { 0, 90.0, 0, 10000 };
+	DeadZone dz2 = { 270.0, 360.0, 0, 10000 };
+	scanner->AddDeadZone(dz1);
+	scanner->AddDeadZone(dz2);
 
 	ScanResult res;
 	while (!ctrl_c_pressed)
