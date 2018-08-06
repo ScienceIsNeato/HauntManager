@@ -6,7 +6,7 @@
 #include "../include/rplidar/rplidar.h" //RPLIDAR standard sdk, all-in-one header
 
 #define NUM_SAMPLE_POINTS 8192
-#define CALIBRATION_PNTS 50 // should make injectable
+#define CALIBRATION_PNTS 250 // should make injectable
 #define CALIBRATION_SCALE_FACTOR 0.98
 #define DEFAULT_CALIBRATION_VALUE 15000.0
 

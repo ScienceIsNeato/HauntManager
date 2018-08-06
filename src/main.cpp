@@ -9,9 +9,8 @@
 
 #include "../include/rplidar/rplidar.h" //RPLIDAR standard sdk, all-in-one header
 #include "../include/Scanner.h"
+#include "../include/Manager.h"
 
-
-/****** START NEW SHIT **********/
 using namespace rp::standalone::rplidar;
 
 bool ctrl_c_pressed;
@@ -40,7 +39,6 @@ void on_finished(RPlidarDriver * drv, Scanner *scanner)
 	scanner->Close(drv);
 	exit(0);
 }
-/********* END NEW SHIT ***************/
 
 int main(int argc, char *argv[])
 {
@@ -114,6 +112,13 @@ int main(int argc, char *argv[])
 				calibration_values[res.closest_index]
 			);
 			double corrected_angle = res.closest_angle - 90;
+
+			//if (current_state == NOT_TRACKING)
+			//{
+			//	first_angle_detected = corrected_angle;
+			//}
+			//current_state = IS_TRACKING;
+
 			if ((corrected_angle > 0.0) && (corrected_angle < 180.0))
 			{
 				std::cout << "\n sending servo angle of " << corrected_angle << std::flush;
@@ -121,9 +126,13 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-			std::cout << "UNACCEPTABLE" << std::flush;
+				std::cout << "-" << std::flush;
 			}
 
+			//if (should_recalibrate(current_state, counter, corrected_angle, first_angle_detected))
+			//{
+			//	scanner->Calibrate(drv, CALIBRATION_PNTS, calibration_values);
+			//}
 		}
 		else
 		{
