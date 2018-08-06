@@ -1,4 +1,5 @@
 #include "../include/Manager.h"
+#include <cmath>
 
 Manager::Manager()
 {

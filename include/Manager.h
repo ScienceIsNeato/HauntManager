@@ -14,4 +14,5 @@ public:
 	int manager_state;
 	double last_tracking_angle;
 	int continuous_tracking_counter;
-}
+};
+
