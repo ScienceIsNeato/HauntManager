@@ -15,7 +15,7 @@ bool Manager::ShouldRecalibrate(int &current_state, int &counter, double angle, 
 		return false;
 	}
 
-	if (abs(angle - first_angle_detected < 10) // TODO make variable
+	if (std::abs(angle - first_angle_detected < 10)) // TODO make variable
 	{
 		counter++;
 	}
