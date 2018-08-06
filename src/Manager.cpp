@@ -6,18 +6,71 @@
 
 Manager::Manager()
 {
+	_num_samples_required = RECALIBRATION_DURATION / SCANNING_INTERVAL;
+	_recalibration_samples = 0;
+	_contemplating_recalibration = false;
 }
 
 Manager::~Manager()
 {
 }
 
+void Manager::StartContemplatingRecalibration()
+{
+	_contemplating_recalibration = true;
+}
+
+bool Manager::ShouldStartContemplatingRecalibration()
+{
+	return ((_manager_state == NOT_TRACKING) && !_contemplating_recalibration);
+}
+
+void Manager::StopContemplatingRecalibration()
+{
+	if (ShouldRecalibrate())
+	{
+		// recalibrate
+	}
+
+	_recalibration_samples = 0;
+	_contemplating_recalibration = false;
+}
+
+void Manager::ContemplateRecalibration(ScanResult scan)
+{
+	if (!_contemplating_recalibration)
+	{
+		return;
+	}
+
+	if (scan.valid && scan.closest_distance < _calibration_values[scan.closest_index])
+	{
+		// Add sample to bin
+	}
+
+	if (_recalibration_samples >= _num_samples_required)
+	{
+		StopContemplatingRecalibration();
+	}
+	_recalibration_samples++;
+}
+
 void Manager::ParseResult(ScanResult scan)
 {
 	if (scan.valid && scan.closest_distance < _calibration_values[scan.closest_index])
 	{
-		std::cout << "good in here" << std::flush;
+		if (ShouldStartContemplatingRecalibration())
+		{
+			StartContemplatingRecalibration();
+		}
+		_manager_state = IS_TRACKING;
 	}
+	else
+	{
+		_manager_state = NOT_TRACKING;
+	}
+
+	ContemplateRecalibration(scan);
 }
 
 void Manager::SetCalibrationValues(double(calibration_values)[NUM_SAMPLE_POINTS])
@@ -32,23 +85,11 @@ void Manager::SetCalibrationValues(double(calibration_values)[NUM_SAMPLE_POINTS]
 //	return _calibration_values;
 //}
 
-bool Manager::ShouldRecalibrate(int &current_state, int &counter, double angle, double first_angle_detected)
+bool Manager::ShouldRecalibrate()
 {
-	if (current_state == NOT_TRACKING)
-	{
-		return false;
-	}
-
-	if (std::abs(angle - first_angle_detected < 10)) // TODO make variable
-	{
-		counter++;
-	}
-
-	if (counter > 60) // TODO make variable
-	{
-		return true;
-	}
+	// TODO check the bins
 
 	return false;
 }
+
 

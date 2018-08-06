@@ -4,6 +4,8 @@
 
 #define IS_TRACKING 1
 #define NOT_TRACKING 0
+#define RECALIBRATION_DURATION 20 // seconds
+#define SCANNING_INTERVAL 0.167 // scan rate is 6 hz
 
 class Manager
 {
@@ -13,15 +15,25 @@ public:
 
 	void ParseResult(ScanResult scan);
 
-	bool ShouldRecalibrate(int &current_state, int &counter, double angle, double first_angle_detected);
+	bool ShouldRecalibrate();
+	bool ShouldStartContemplatingRecalibration();
+
 	void SetCalibrationValues(double(calibration_values)[NUM_SAMPLE_POINTS]);
+	void StartContemplatingRecalibration();
+	void StopContemplatingRecalibration();
+	void ContemplateRecalibration(ScanResult scan);
+
+
 	//double(&calibration_values)[NUM_SAMPLE_POINTS] GetCalibrationValues();
 
 
-	int manager_state;
-	double last_tracking_angle;
-	int continuous_tracking_counter;
+	int _manager_state;
 	double _calibration_values[NUM_SAMPLE_POINTS];
+	int _recent_scans_tracker[36]; // divide 360 degrees into 36 bins
+	int _recalibration_samples;
+	int _num_samples_required;
+	bool _contemplating_recalibration;
 };
+
 
 
