@@ -7,6 +7,9 @@
 #define RECALIBRATION_DURATION 20 // seconds
 #define SCANNING_INTERVAL 0.167 // scan rate is 6 hz
 
+#define RECALIBRATION_PERCENT_THRESHOLD 90.0 // percent of samples that were valid during comtemplation period
+#define RECALIBRATION_BIN_THRESHOLD 3 // number of bins populated during contemplation threshold
+
 class Manager
 {
 public:
@@ -34,6 +37,7 @@ public:
 	int _num_samples_required;
 	bool _contemplating_recalibration;
 };
+
 
 
 
