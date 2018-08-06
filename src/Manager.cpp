@@ -98,6 +98,12 @@ bool Manager::ShouldRecalibrate()
 	double percent_positive_scans = 100.0*((double)samples_collected / (double)_num_samples_required);
 
 	std::cout << "\npercent positive scans: " << percent_positive_scans << " num bins populated: " << num_bins_populated << std::endl;
+
+	// reset this dude for next time
+	for (int i = 0; i < 36; i++)
+	{
+		_recent_scans_tracker[i] = 0;
+	}
 	
 	return ((percent_positive_scans >= RECALIBRATION_PERCENT_THRESHOLD) && (num_bins_populated <= RECALIBRATION_BIN_THRESHOLD));
 }
