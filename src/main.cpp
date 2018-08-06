@@ -42,6 +42,8 @@ void on_finished(RPlidarDriver * drv, Scanner *scanner)
 
 int main(int argc, char *argv[])
 {
+	std::shared_ptr<Manager> manager = std::make_shared<Manager>();
+
 	AngleMaps angle_maps;
 	int gpio_pin = 17;
 
@@ -93,6 +95,8 @@ int main(int argc, char *argv[])
 	}
 
 	scanner->Calibrate(drv, CALIBRATION_PNTS, calibration_values);
+	manager->SetCalibrationValues(calibration_values);
+
 
 	// We want to ignore anything behind the scanner in this demo - servo can't turn that way anyway
 	DeadZone dz1 = { 0, 90.0, 0, 10000 };
@@ -104,6 +108,8 @@ int main(int argc, char *argv[])
 	while (!ctrl_c_pressed)
 	{
 		res = scanner->Scan(drv, calibration_values);
+		manager->ParseResult(res);
+
 		if (res.valid && res.closest_distance < calibration_values[res.closest_index])
 		{
 			printf("\nshortest theta: %03.2f shortest Dist: %08.2f calibration Dist: %08.2f",
@@ -144,4 +150,5 @@ int main(int argc, char *argv[])
 	std::cout << "\nCleaning up...\n";
 	return 0;
 }
+
 
