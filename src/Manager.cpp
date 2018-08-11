@@ -10,10 +10,27 @@ Manager::Manager()
 	_recalibration_samples = 0;
 	_contemplating_recalibration = false;
 	_recent_scans_tracker[36] = { 0 };
+	InitializeLEDs();
 }
 
 Manager::~Manager()
 {
+}
+
+void Manager::InitializeLEDs()
+{
+	if (gpioInitialise() < 0)
+	{
+		std::cout << "\nError initializing gpio.\n" << std::flush;
+		exit(1);
+	}
+	_calibration_LED_pin = CALIBRATION_LED_PIN;
+	gpioSetMode(_calibration_LED_pin, PI_OUTPUT);
+}
+
+void Manager::ToggleLED(int pin, int state)
+{
+	gpioWrite(pin, state);
 }
 
 void Manager::StartContemplatingRecalibration()

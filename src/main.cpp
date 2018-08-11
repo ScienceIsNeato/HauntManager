@@ -94,7 +94,10 @@ int main(int argc, char *argv[])
 		on_finished(drv, scanner);
 	}
 
+	manager->ToggleLED(CALIBRATION_LED_PIN, LED_ON);
 	scanner->Calibrate(drv, CALIBRATION_PNTS, calibration_values);
+	manager->ToggleLED(CALIBRATION_LED_PIN, LED_OFF);
+
 	manager->SetCalibrationValues(calibration_values);
 
 
