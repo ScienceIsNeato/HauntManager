@@ -4,8 +4,10 @@
 #include <cstring>
 
 
-Manager::Manager()
+Manager::Manager(RPlidarDriver * drv, Scanner *scanner)
 {
+	_lidar_driver = drv;
+	_scanner = scanner;
 	_num_samples_required = (double)RECALIBRATION_DURATION / SCANNING_INTERVAL;
 	_recalibration_samples = 0;
 	_contemplating_recalibration = false;
@@ -17,20 +19,12 @@ Manager::~Manager()
 {
 }
 
-void Manager::InitializeLEDs()
+/******** LIDAR CALIBRATION *************/
+void Manager::CalibrateScanner()
 {
-	if (gpioInitialise() < 0)
-	{
-		std::cout << "\nError initializing gpio.\n" << std::flush;
-		exit(1);
-	}
-	_calibration_LED_pin = CALIBRATION_LED_PIN;
-	gpioSetMode(_calibration_LED_pin, PI_OUTPUT);
-}
-
-void Manager::ToggleLED(int pin, int state)
-{
-	gpioWrite(pin, state);
+	ToggleLED(CALIBRATION_LED_PIN, LED_ON);
+	_scanner->Calibrate(_lidar_driver, CALIBRATION_PNTS, calibration_values);
+	ToggleLED(CALIBRATION_LED_PIN, LED_OFF);
 }
 
 void Manager::StartContemplatingRecalibration()
@@ -47,7 +41,8 @@ void Manager::StopContemplatingRecalibration()
 {
 	if (ShouldRecalibrate())
 	{
-		std::cout << "RECALIBRATE THIS MOTHERFUCKER!!!!\n";
+		std::cout << "RECALIBRATING!!!!\n";
+		CalibrateScanner();
 	}
 
 	_recalibration_samples = 0;
@@ -61,7 +56,7 @@ void Manager::ContemplateRecalibration(ScanResult scan)
 		return;
 	}
 
-	if (scan.valid && scan.closest_distance < _calibration_values[scan.closest_index])
+	if (scan.valid && scan.closest_distance < calibration_values[scan.closest_index])
 	{
 		// Add sample to bin - cast to int, divide by 10,
 		// so 9 goes in index 0, 19 to index 1, 29 to index 2, etc.
@@ -73,29 +68,6 @@ void Manager::ContemplateRecalibration(ScanResult scan)
 		StopContemplatingRecalibration();
 	}
 	_recalibration_samples++;
-}
-
-void Manager::ParseResult(ScanResult scan)
-{
-	if (scan.valid && scan.closest_distance < _calibration_values[scan.closest_index])
-	{
-		if (ShouldStartContemplatingRecalibration())
-		{
-			StartContemplatingRecalibration();
-		}
-		_manager_state = IS_TRACKING;
-	}
-	else
-	{
-		_manager_state = NOT_TRACKING;
-	}
-
-	ContemplateRecalibration(scan);
-}
-
-void Manager::SetCalibrationValues(double(calibration_values)[NUM_SAMPLE_POINTS])
-{
-	memcpy(_calibration_values, calibration_values, NUM_SAMPLE_POINTS * sizeof(double)); // int is a POD
 }
 
 bool Manager::ShouldRecalibrate()
@@ -121,9 +93,45 @@ bool Manager::ShouldRecalibrate()
 	{
 		_recent_scans_tracker[i] = 0;
 	}
-	
+
 	return ((percent_positive_scans >= RECALIBRATION_PERCENT_THRESHOLD) && (num_bins_populated <= RECALIBRATION_BIN_THRESHOLD));
 }
 
+/**************** LIGHTING ***************/
+void Manager::InitializeLEDs()
+{
+	if (gpioInitialise() < 0)
+	{
+		std::cout << "\nError initializing gpio.\n" << std::flush;
+		exit(1);
+	}
+	_calibration_LED_pin = CALIBRATION_LED_PIN;
+	gpioSetMode(_calibration_LED_pin, PI_OUTPUT);
+}
+
+void Manager::ToggleLED(int pin, int state)
+{
+	gpioWrite(pin, state);
+}
+
+
+/**************************STATE MACHINE *****************/
+void Manager::ParseResult(ScanResult scan)
+{
+	if (scan.valid && scan.closest_distance < calibration_values[scan.closest_index])
+	{
+		if (ShouldStartContemplatingRecalibration())
+		{
+			StartContemplatingRecalibration();
+		}
+		_manager_state = IS_TRACKING;
+	}
+	else
+	{
+		_manager_state = NOT_TRACKING;
+	}
+
+	ContemplateRecalibration(scan);
+}
 
 

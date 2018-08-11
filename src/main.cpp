@@ -33,6 +33,7 @@ RPlidarDriver* CreateDriver()
 
 void on_finished(RPlidarDriver * drv, Scanner *scanner)
 {
+	// TODO move this stuff to manager Stop method
 	scanner->Stop(drv);
 	int tmp;
 	std::cin >> tmp;
@@ -42,7 +43,6 @@ void on_finished(RPlidarDriver * drv, Scanner *scanner)
 
 int main(int argc, char *argv[])
 {
-	std::shared_ptr<Manager> manager = std::make_shared<Manager>();
 
 	AngleMaps angle_maps;
 	int gpio_pin = 17;
@@ -63,11 +63,11 @@ int main(int argc, char *argv[])
 
 		left.angle = atoi(argv[6]);
 		left.pulse_width = atoi(argv[7]);
-		std::cout << "\nGood job!\n";
-		std::cout << "center angle is " << center.angle << "and pulse is " << center.pulse_width << std::endl;
+		std::cout << "\nTODO move loading of servo specs into code instead of cmd line inputs...\n";
 	}
 	else
 	{
+		// TODO remove this stuff - config in code
 		std::cout << "\nYou called me wrong. Call me like this:\n";
 		std::cout << "\tsudo ./servo_tester <gpio_pin> <right_angle> <right_pulse> <center_angle> <center_pulse> <left_angle> <left_pulse>\n\n";
 		exit(1);
@@ -84,22 +84,18 @@ int main(int argc, char *argv[])
 
 	std::shared_ptr<pigpioServo> servo = std::make_shared<pigpioServo>(gpio_pin, angle_maps, offset);
 
-	double calibration_values[NUM_SAMPLE_POINTS];
 	signal(SIGINT, ctrlc); // set signal handler for control c
 	Scanner *scanner = new Scanner();
 	RPlidarDriver * drv = CreateDriver(); // create the driver instance - for some reason creating it in the Scanner class crashes the program
 
+	std::shared_ptr<Manager> manager = std::make_shared<Manager>(drv, scanner);
+
+	// TODO Move into manager start method
 	if (!(scanner->Start(drv, NULL, NULL))) // Use default com path and baud rate
 	{
 		on_finished(drv, scanner);
 	}
-
-	manager->ToggleLED(CALIBRATION_LED_PIN, LED_ON);
-	scanner->Calibrate(drv, CALIBRATION_PNTS, calibration_values);
-	manager->ToggleLED(CALIBRATION_LED_PIN, LED_OFF);
-
-	manager->SetCalibrationValues(calibration_values);
-
+	manager->CalibrateScanner();
 
 	// We want to ignore anything behind the scanner in this demo - servo can't turn that way anyway
 	DeadZone dz1 = { 0, 90.0, 0, 10000 };
@@ -110,23 +106,17 @@ int main(int argc, char *argv[])
 	ScanResult res;
 	while (!ctrl_c_pressed)
 	{
-		res = scanner->Scan(drv, calibration_values);
+		res = scanner->Scan(drv, manager->calibration_values);
 		manager->ParseResult(res);
 
-		if (res.valid && res.closest_distance < calibration_values[res.closest_index])
+		if (res.valid && res.closest_distance < manager->calibration_values[res.closest_index])
 		{
 			printf("\nshortest theta: %03.2f shortest Dist: %08.2f calibration Dist: %08.2f",
 				res.closest_angle,
 				res.closest_distance,
-				calibration_values[res.closest_index]
+				manager->calibration_values[res.closest_index]
 			);
 			double corrected_angle = res.closest_angle - 90;
-
-			//if (current_state == NOT_TRACKING)
-			//{
-			//	first_angle_detected = corrected_angle;
-			//}
-			//current_state = IS_TRACKING;
 
 			if ((corrected_angle > 0.0) && (corrected_angle < 180.0))
 			{
@@ -137,11 +127,6 @@ int main(int argc, char *argv[])
 			{
 				std::cout << "-" << std::flush;
 			}
-
-			//if (should_recalibrate(current_state, counter, corrected_angle, first_angle_detected))
-			//{
-			//	scanner->Calibrate(drv, CALIBRATION_PNTS, calibration_values);
-			//}
 		}
 		else
 		{

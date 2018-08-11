@@ -20,31 +20,39 @@
 class Manager
 {
 public:
-	Manager();
+	Manager(RPlidarDriver * drv, Scanner *scanner);
 	~Manager();
 
-	void ParseResult(ScanResult scan);
-
+	/******** LIDAR CALIBRATION *************/
+	// --------- methods ----------
+	void CalibrateScanner();
 	bool ShouldRecalibrate();
 	bool ShouldStartContemplatingRecalibration();
-
-	void SetCalibrationValues(double(calibration_values)[NUM_SAMPLE_POINTS]);
 	void StartContemplatingRecalibration();
 	void StopContemplatingRecalibration();
 	void ContemplateRecalibration(ScanResult scan);
-	void InitializeLEDs();
-	void ToggleLED(int pin, int state);
-
-	//double(&calibration_values)[NUM_SAMPLE_POINTS] GetCalibrationValues();
-
-
-	int _manager_state;
-	int _calibration_LED_pin;
-	double _calibration_values[NUM_SAMPLE_POINTS];
+	// --------- variables ----------
+	double calibration_values[NUM_SAMPLE_POINTS];
 	int _recent_scans_tracker[36]; // divide 360 degrees into 36 bins
 	int _recalibration_samples;
 	int _num_samples_required;
 	bool _contemplating_recalibration;
+
+
+	/******** LIGHTING *******************/
+	// --------- methods ----------
+	void InitializeLEDs();
+	void ToggleLED(int pin, int state);
+	//--------- variables ----------
+	int _calibration_LED_pin;
+
+	/******** STATE MACHINE *************/
+	// --------- methods ----------
+	void ParseResult(ScanResult scan);
+	// --------- variables ----------
+	int _manager_state;
+	RPlidarDriver * _lidar_driver;
+	Scanner * _scanner;
 };
 
 
