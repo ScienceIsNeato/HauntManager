@@ -32,21 +32,32 @@ void Manager::StartContemplatingRecalibration()
 	_contemplating_recalibration = true;
 }
 
-bool Manager::ShouldStartContemplatingRecalibration()
+bool Manager::ShouldStartContemplatingRecalibration(bool actively_scanning)
 {
-	return ((_manager_state == NOT_TRACKING) && !_contemplating_recalibration);
+
+	return (actively_scanning && !_contemplating_recalibration);
 }
 
 void Manager::StopContemplatingRecalibration()
 {
 	if (ShouldRecalibrate())
 	{
-		std::cout << "RECALIBRATING!!!!\n";
+		std::cout << "RECALIBRATING!!!!\n" << std::flush;
 		CalibrateScanner();
+	}
+	else
+	{
+		std::cout << "Decided not to recalibrate...\n" << std::flush;
 	}
 
 	_recalibration_samples = 0;
 	_contemplating_recalibration = false;
+
+	// reset this dude for next time
+	for (int i = 0; i < 36; i++)
+	{
+		_recent_scans_tracker[i] = 0;
+	}
 }
 
 void Manager::ContemplateRecalibration(ScanResult scan)
@@ -56,7 +67,7 @@ void Manager::ContemplateRecalibration(ScanResult scan)
 		return;
 	}
 
-	if (scan.valid && scan.closest_distance < calibration_values[scan.closest_index])
+	if (DetectingSomething(scan))
 	{
 		// Add sample to bin - cast to int, divide by 10,
 		// so 9 goes in index 0, 19 to index 1, 29 to index 2, etc.
@@ -72,6 +83,8 @@ void Manager::ContemplateRecalibration(ScanResult scan)
 
 bool Manager::ShouldRecalibrate()
 {
+	std::cout << "Calculating recalibration...\n" std::endl;
+
 	int num_bins_populated = 0;
 	int samples_collected = 0;
 	for (int i = 0; i < 36; i++)
@@ -86,13 +99,8 @@ bool Manager::ShouldRecalibrate()
 
 	double percent_positive_scans = 100.0*((double)samples_collected / (double)_num_samples_required);
 
-	std::cout << "\npercent positive scans: " << percent_positive_scans << " num bins populated: " << num_bins_populated << std::endl;
-
-	// reset this dude for next time
-	for (int i = 0; i < 36; i++)
-	{
-		_recent_scans_tracker[i] = 0;
-	}
+	std::cout << "\npercent positive scans: " << percent_positive_scans << " , threshold: " << RECALIBRATION_PERCENT_THRESHOLD << std::endl;
+	std::cout << "\nNum bins populated: " << num_bins_populated << " , threshold: " << RECALIBRATION_BIN_THRESHOLD << std::endl;
 
 	return ((percent_positive_scans >= RECALIBRATION_PERCENT_THRESHOLD) && (num_bins_populated <= RECALIBRATION_BIN_THRESHOLD));
 }
@@ -118,9 +126,10 @@ void Manager::ToggleLED(int pin, int state)
 /**************************STATE MACHINE *****************/
 void Manager::ParseResult(ScanResult scan)
 {
-	if (scan.valid && scan.closest_distance < calibration_values[scan.closest_index])
+	bool actively_tracking = DetectingSomething(scan);
+	if (actively_tracking)
 	{
-		if (ShouldStartContemplatingRecalibration())
+		if (ShouldStartContemplatingRecalibration(true))
 		{
 			StartContemplatingRecalibration();
 		}
@@ -132,6 +141,11 @@ void Manager::ParseResult(ScanResult scan)
 	}
 
 	ContemplateRecalibration(scan);
+}
+
+bool Manager::DetectingSomething(ScanResult scan)
+{
+	return (scan.valid && scan.closest_distance < calibration_values[scan.closest_index]);
 }
 
 

@@ -27,7 +27,7 @@ public:
 	// --------- methods ----------
 	void CalibrateScanner();
 	bool ShouldRecalibrate();
-	bool ShouldStartContemplatingRecalibration();
+	bool ShouldStartContemplatingRecalibration(bool actively_tracking);
 	void StartContemplatingRecalibration();
 	void StopContemplatingRecalibration();
 	void ContemplateRecalibration(ScanResult scan);
@@ -49,6 +49,7 @@ public:
 	/******** STATE MACHINE *************/
 	// --------- methods ----------
 	void ParseResult(ScanResult scan);
+	bool DetectingSomething(ScanResult scan);
 	// --------- variables ----------
 	int _manager_state;
 	RPlidarDriver * _lidar_driver;
