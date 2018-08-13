@@ -163,7 +163,7 @@ void Manager::StartHeartbeat()
 {
 	std::ofstream file_h;
 	file_h.open("/tmp/haunt_manager_heartbeat.log", std::ofstream::trunc);
-	_heartbeat_fh = file;
+	_heartbeat_fh = file_h;
 }
 
 void Manager::Heartbeat()

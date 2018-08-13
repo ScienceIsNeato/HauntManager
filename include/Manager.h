@@ -2,6 +2,7 @@
 
 #include "Scanner.h"
 #include <pigpio.h>   
+#include <iostream>
 #include <fstream>
 
 
@@ -63,7 +64,7 @@ public:
 	void Heartbeat();
 	void StopHeartbeat();
 	// --------- variables ----------
-	ofstream _heartbeat_fh;
+	std::ofstream _heartbeat_fh;
 };
 
 
