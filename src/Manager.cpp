@@ -83,7 +83,7 @@ void Manager::ContemplateRecalibration(ScanResult scan)
 
 bool Manager::ShouldRecalibrate()
 {
-	std::cout << "Calculating recalibration...\n" std::endl;
+	std::cout << "Calculating recalibration...\n" << std::endl;
 
 	int num_bins_populated = 0;
 	int samples_collected = 0;
