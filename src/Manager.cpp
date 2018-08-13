@@ -17,6 +17,7 @@ Manager::Manager(RPlidarDriver * drv, Scanner *scanner)
 
 Manager::~Manager()
 {
+	StopHeartbeat();
 }
 
 /******** LIDAR CALIBRATION *************/
@@ -41,7 +42,7 @@ bool Manager::ShouldStartContemplatingRecalibration(bool actively_scanning)
 		std::cout << "\nStarting potential recalibration routine with " << RECALIBRATION_DURATION << " second duration... \n" << std::flush;
 	}
 
-	return ret_val;
+	return ret_val;	
 }
 
 void Manager::StopContemplatingRecalibration()
@@ -147,11 +148,32 @@ void Manager::ParseResult(ScanResult scan)
 	}
 
 	ContemplateRecalibration(scan);
+	Heartbeat();
 }
 
 bool Manager::DetectingSomething(ScanResult scan)
 {
 	return (scan.valid && scan.closest_distance < calibration_values[scan.closest_index]);
+}
+
+// These methods are to support a way for the program to let the OS know that it is still running.
+// Haven't figured out the issue yet, but sometimes the program becomes unresponsive. So I've got a cron job
+// that monitors the heartbeat file and auto-restarts the program if it becomes unresponsive
+void Manager::StartHeartbeat()
+{
+	ofstream file_h;
+	file_h.open("/tmp/haunt_manager_heartbeat.log");
+	_heartbeat_fh = file;
+}
+
+void Manager::Heartbeat()
+{
+	_heartbeat_fh << "<3\n";
+}
+
+void Manager::StopHeartbeat()
+{
+	_heartbeat_fh.close();
 }
 
 

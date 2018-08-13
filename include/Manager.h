@@ -2,6 +2,8 @@
 
 #include "Scanner.h"
 #include <pigpio.h>   
+#include <fstream>
+
 
 #define IS_TRACKING 1
 #define NOT_TRACKING 0
@@ -54,6 +56,14 @@ public:
 	int _manager_state;
 	RPlidarDriver * _lidar_driver;
 	Scanner * _scanner;
+
+	/********** HEARTBEAT *************/
+	// --------- methods ----------
+	void StartHeartbeat();
+	void Heartbeat();
+	void StopHeartbeat();
+	// --------- variables ----------
+	ofstream _heartbeat_fh;
 };
 
 
