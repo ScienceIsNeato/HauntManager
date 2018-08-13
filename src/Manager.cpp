@@ -34,20 +34,26 @@ void Manager::StartContemplatingRecalibration()
 
 bool Manager::ShouldStartContemplatingRecalibration(bool actively_scanning)
 {
+	bool ret_val = actively_scanning && !_contemplating_recalibration;
 
-	return (actively_scanning && !_contemplating_recalibration);
+	if (ret_val)
+	{
+		std::cout << "\nStarting potential recalibration routine with " << RECALIBRATION_DURATION << " second duration... \n" << std::flush;
+	}
+
+	return ret_val;
 }
 
 void Manager::StopContemplatingRecalibration()
 {
 	if (ShouldRecalibrate())
 	{
-		std::cout << "RECALIBRATING!!!!\n" << std::flush;
+		std::cout << "\nRECALIBRATING!!!!\n" << std::flush;
 		CalibrateScanner();
 	}
 	else
 	{
-		std::cout << "Decided not to recalibrate...\n" << std::flush;
+		std::cout << "\nDecided not to recalibrate...\n" << std::flush;
 	}
 
 	_recalibration_samples = 0;
@@ -83,7 +89,7 @@ void Manager::ContemplateRecalibration(ScanResult scan)
 
 bool Manager::ShouldRecalibrate()
 {
-	std::cout << "Calculating recalibration...\n" << std::endl;
+	std::cout << "\nCalculating recalibration...\n" << std::endl;
 
 	int num_bins_populated = 0;
 	int samples_collected = 0;
@@ -93,13 +99,13 @@ bool Manager::ShouldRecalibrate()
 		{
 			num_bins_populated++;
 			samples_collected += _recent_scans_tracker[i];
-			std::cout << "\nfor bin: " << i << "num samples was " << _recent_scans_tracker[i] << std::endl;
+			std::cout << "\n\tFor bin: " << i << "num samples was " << _recent_scans_tracker[i] << std::endl;
 		}
 	}
 
 	double percent_positive_scans = 100.0*((double)samples_collected / (double)_num_samples_required);
 
-	std::cout << "\npercent positive scans: " << percent_positive_scans << " , threshold: " << RECALIBRATION_PERCENT_THRESHOLD << std::endl;
+	std::cout << "\nPercent positive scans: " << percent_positive_scans << " , threshold: " << RECALIBRATION_PERCENT_THRESHOLD << std::endl;
 	std::cout << "\nNum bins populated: " << num_bins_populated << " , threshold: " << RECALIBRATION_BIN_THRESHOLD << std::endl;
 
 	return ((percent_positive_scans >= RECALIBRATION_PERCENT_THRESHOLD) && (num_bins_populated <= RECALIBRATION_BIN_THRESHOLD));
