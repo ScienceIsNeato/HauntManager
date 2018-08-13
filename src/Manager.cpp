@@ -161,9 +161,14 @@ bool Manager::DetectingSomething(ScanResult scan)
 // that monitors the heartbeat file and auto-restarts the program if it becomes unresponsive
 void Manager::StartHeartbeat()
 {
-	std::ofstream file_h;
-	file_h.open("/tmp/haunt_manager_heartbeat.log", std::ofstream::trunc);
-	_heartbeat_fh = file_h;
+	if (_heartbeat_fh.open("/tmp/haunt_manager_heartbeat.log", std::ofstream::trunc))
+	{
+		std::cout << "\nSuccessfully opened heartbeat file.\n" << std::flush;
+	}
+	else
+	{
+		std::cout << "\nError: could not open heartbeat file.\n" << std::flush;
+	}
 }
 
 void Manager::Heartbeat()
