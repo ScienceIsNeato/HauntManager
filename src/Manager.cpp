@@ -13,6 +13,7 @@ Manager::Manager(RPlidarDriver * drv, Scanner *scanner)
 	_contemplating_recalibration = false;
 	_recent_scans_tracker[36] = { 0 };
 	InitializeLEDs();
+	StartHeartbeat();
 }
 
 Manager::~Manager()
@@ -161,24 +162,26 @@ bool Manager::DetectingSomething(ScanResult scan)
 // that monitors the heartbeat file and auto-restarts the program if it becomes unresponsive
 void Manager::StartHeartbeat()
 {
-	if (_heartbeat_fh.open("/tmp/haunt_manager_heartbeat.log", std::ofstream::trunc))
+	_heartbeat_fh = fopen("/tmp/haunt_manager_heartbeat.log", "w");
+	if(_heartbeat_fh == NULL)
 	{
-		std::cout << "\nSuccessfully opened heartbeat file.\n" << std::flush;
+		std::cout << "\nError: could not open heartbeat file.\n" << std::flush;
 	}
 	else
 	{
-		std::cout << "\nError: could not open heartbeat file.\n" << std::flush;
+		std::cout << "\nSuccessfully opened heartbeat file.\n" << std::flush;
 	}
 }
 
 void Manager::Heartbeat()
 {
-	_heartbeat_fh << "<3\n";
+	fprintf(_heartbeat_fh, "<3\n");
+	fflush(_heartbeat_fh);
 }
 
 void Manager::StopHeartbeat()
 {
-	_heartbeat_fh.close();
+	fclose(_heartbeat_fh);
 }
 
 

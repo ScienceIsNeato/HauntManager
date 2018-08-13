@@ -2,8 +2,6 @@
 
 #include "Scanner.h"
 #include <pigpio.h>   
-#include <iostream>
-#include <fstream>
 
 
 #define IS_TRACKING 1
@@ -64,7 +62,7 @@ public:
 	void Heartbeat();
 	void StopHeartbeat();
 	// --------- variables ----------
-	std::ofstream _heartbeat_fh;
+	FILE *_heartbeat_fh;
 };
 
 
