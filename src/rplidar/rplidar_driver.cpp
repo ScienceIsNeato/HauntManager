@@ -844,8 +844,8 @@ void RPlidarDriverImplCommon::_ultraCapsuleToNormal(const rplidar_response_ultra
             // signed partical integer, using the magic shift here
             // DO NOT TOUCH
 
-            int dist_predict1 = (((int)(combined_x3 << 10)) >> 22);
-            int dist_predict2 = (((int)combined_x3) >> 22);
+            unsigned int dist_predict1 = (((int)(combined_x3 << 10)) >> 22);
+            unsigned int dist_predict2 = (((int)combined_x3) >> 22);
 
             int dist_major2;
 
