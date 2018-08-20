@@ -43,35 +43,21 @@ void on_finished(RPlidarDriver * drv, Scanner *scanner)
 
 int main(int argc, char *argv[])
 {
-
-	AngleMaps angle_maps;
+	// BEGIN Servo Setup (TODO - move to json file or something)
 	int gpio_pin = 17;
+	AngleMaps angle_maps;
 
 	AngleMap center;
 	AngleMap right;
 	AngleMap left;
 
-	if (argc == 8)
-	{
-		gpio_pin = atoi(argv[1]);
+	right.angle = 180;
+	center.angle = 90;
+	left.angle = 0;
 
-		right.angle = atoi(argv[2]);
-		right.pulse_width = atoi(argv[3]);
-
-		center.angle = atoi(argv[4]);
-		center.pulse_width = atoi(argv[5]);
-
-		left.angle = atoi(argv[6]);
-		left.pulse_width = atoi(argv[7]);
-		std::cout << "\nTODO move loading of servo specs into code instead of cmd line inputs...\n";
-	}
-	else
-	{
-		// TODO remove this stuff - config in code
-		std::cout << "\nYou called me wrong. Call me like this:\n";
-		std::cout << "\tsudo ./servo_tester <gpio_pin> <right_angle> <right_pulse> <center_angle> <center_pulse> <left_angle> <left_pulse>\n\n";
-		exit(1);
-	}
+	right.pulse_width = 750;
+	center.pulse_width = 1650;
+	left.pulse_width = 2500;
 
 	angle_maps.center_map = center;
 	angle_maps.right_map = right;
@@ -83,6 +69,7 @@ int main(int argc, char *argv[])
 	offset.offsetY = 0;
 
 	std::shared_ptr<pigpioServo> servo = std::make_shared<pigpioServo>(gpio_pin, angle_maps, offset);
+	// ENG Servo setup
 
 	signal(SIGINT, ctrlc); // set signal handler for control c
 	Scanner *scanner = new Scanner();

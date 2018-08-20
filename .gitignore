@@ -1,4 +1,6 @@
 haunt_manager
 calibrate
+servo_tester
+.vs
 *.out
 

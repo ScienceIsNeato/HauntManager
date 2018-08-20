@@ -56,8 +56,8 @@ void printExitStatement(AngleMap center_val, AngleMap right_val, AngleMap left_v
 	std::cout << "\tCenter\t(" << center_val.angle << " degrees, " << center_val.pulse_width << " duty cycle)\n";
 	std::cout << "\tLeft\t(" << left_val.angle << " degrees, " << left_val.pulse_width << " duty cycle)\n";
 	std::cout << "\nNext, you should test these calibration results by running the following command:\n";
-	std::cout << "\n\n\t sudo ./test_servo " << gpio_pin << " " << right_val.angle << " " << right_val.pulse_width << " " << center_val.angle << " " << center_val.pulse_width << " " << left_val.angle << " " << left_val.pulse_width << std::endl;
-	std::cout << " \n\nor you can call up an instance of a calibrated servo with the following code: TODO\n";
+	std::cout << "\n\n\t sudo ./servo_tester " << gpio_pin << " " << right_val.angle << " " << right_val.pulse_width << " " << center_val.angle << " " << center_val.pulse_width << " " << left_val.angle << " " << left_val.pulse_width << std::endl;
+	std::cout << " \n\nIf that works, modify main.cpp to have your values after \"Begin Servo Setup\"";
 }
 
 void stop(int is_error)
