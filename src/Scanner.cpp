@@ -257,7 +257,9 @@ bool Scanner::Start(RPlidarDriver *drv, const char * com_path, const char * baud
 
 void Scanner::Stop(RPlidarDriver *drv)
 {
+	printf("\nStopping the LIDAR scanner driver...");
 	drv->stop();
+	printf("\nStopping the LIDAR scanner motor...");
 	drv->stopMotor();
 }
 

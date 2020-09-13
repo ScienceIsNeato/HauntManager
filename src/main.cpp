@@ -18,7 +18,8 @@ bool ctrl_c_pressed;
 // Local helpers
 void ctrlc(int)
 {
-    ctrl_c_pressed = true;
+	ctrl_c_pressed = true;
+	printf("\n\nCaptured a SIGTERM - Cleaning Up...");
 }
 
 RPlidarDriver* CreateDriver()
@@ -38,7 +39,6 @@ void on_finished(RPlidarDriver * drv, Scanner *scanner)
 	int tmp;
 	std::cin >> tmp;
 	scanner->Close(drv);
-	exit(0);
 }
 
 int main(int argc, char *argv[])
