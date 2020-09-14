@@ -18,10 +18,35 @@ throws bugs, you can download the firmware here: http://www.slamtec.com/en/suppo
 Have fun!
 
 # Misc Notes
+You'll probably eventually want to setup your rPi so that this program runs at startup. Here's
+a way to do that by adding the following to the bottom of your ~/.bashrc file:
+``` sh
+    115 cd /home/pi/dev/HauntManager
+    116
+    117 NUM_PROCESSES=`ps -ef | pgrep haunt_manager | wc -l`
+    118
+    119 if [ $NUM_PROCESSES = 0 ]
+    120 then
+    121         echo "\nLogging in and no haunt_manager started - so gonna start one...\n"
+    122 else
+    123         echo "\nStarting new session. Was going to start haunt_manager, but one already running...\n"
+    124 fi
+```
+
+# Installing as a service
+- `sudo cp hauntManager.service /etc/systemd/system/hauntManager.service`
+- `sudo systemctl daemon-reload`
+- `sudo systemctl enable myscript.service` (to automatically start service on boot)
+- `sudo service hauntManager start`
+- then you can tail the logs of the service using `tail -f /var/log/syslog`
 
 # Installing the restarter into cron
 There is some sort of bug that causes the program to occasionally become unresponsive - probably a memory leak. While we want to fix this eventually, there is a script here that will force the pi to always stay up and running. If you experience unresponsiveness, su to root and type `crontab -e` and add the following to the bottom of the file:
 
 	* * * * * /home/pi/HauntManager/monitor_haunt.sh 
+
+If you do above, you'll want to set up a couple files.
+`echo "0" > /tmp/last_haunt_heart_count`
+`touch ~/haunt_restarts.log`
 
 

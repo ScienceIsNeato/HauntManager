@@ -1,0 +1,9 @@
+[Unit]
+Description=Haunt Manager
+
+[Service]
+Type=simple
+ExecStart=/home/pi/dev/HauntManager/haunt_manager
+
+[Install]
+WantedBy=multi-user.target
