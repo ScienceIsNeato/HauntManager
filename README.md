@@ -13,7 +13,8 @@ throws bugs, you can download the firmware here: http://www.slamtec.com/en/suppo
 3. Run the servo_tester as instructed by the calibration binary
 4. Modify main.cpp as instructed by the calibration binary
 5. Run build_manager.sh
-6. Run haunt_manager as instructed by build script
+6. `cp servo_config_template.conf servo_config.conf` and update values based on your previous steps
+7. Run haunt_manager as instructed by build script
 
 Have fun!
 
