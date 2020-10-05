@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	else
 	{
 		std::cout << "\nYou called me wrong. Call me like this:\n";
-		std::cout << "\tsudo ./servo_tester <gpio_pin> <right_angle> <right_pulse> <center_angle> <center_pulse> <left_angle> <left_pulse>\n\n";
+		std::cout << "    sudo ./servo_tester <gpio_pin> <right_angle> <right_pulse> <center_angle> <center_pulse> <left_angle> <left_pulse>\n\n";
 		exit(1);
 	}
 

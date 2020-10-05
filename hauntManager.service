@@ -3,6 +3,7 @@ Description=Haunt Manager
 
 [Service]
 Type=simple
+WorkingDirectory=/home/pi/dev/HauntManager/
 ExecStart=/home/pi/dev/HauntManager/haunt_manager
 
 [Install]

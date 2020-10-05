@@ -18,15 +18,12 @@ pigpioServo::pigpioServo(int gpio_pin, AngleMaps boundaries, InitialOffset initi
 	SetGpioPin(gpio_pin);
 	SetBoundaries(boundaries);
 	SetOffset(initial_offset);
-	std::cout << "\nABOUT TO CALL INIT" << std::flush;
 	Initialize();
-	std::cout << "\nINIT CALLED" << std::flush;
-
 }
 
 pigpioServo::~pigpioServo()
 {
-	std::cout << "\nFUCKING DESTRUCTOR GETTING CALLED\n" << std::flush;
+	std::cout << "\npigpioServo Destructor called...\n" << std::flush;
 	Stop();
 }
 

@@ -101,7 +101,7 @@ bool Manager::ShouldRecalibrate()
 		{
 			num_bins_populated++;
 			samples_collected += _recent_scans_tracker[i];
-			std::cout << "\n\tFor bin: " << i << "num samples was " << _recent_scans_tracker[i] << std::endl;
+			std::cout << "\n     For bin: " << i << ", num samples was " << _recent_scans_tracker[i] << std::endl;
 		}
 	}
 

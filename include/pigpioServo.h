@@ -4,6 +4,7 @@
 
 #include <pigpio.h>
 #include <iostream>
+#include <string>
 
 #define NUM_GPIO 32
 #define MIN_PULSE_WIDTH 500
@@ -33,6 +34,14 @@ struct AngleMaps
 	AngleMap left_map;
 	AngleMap center_map;
 	AngleMap right_map;
+};
+
+struct ServoConfig
+{
+	std::string name;
+	int gpio_pin;
+	AngleMaps angle_maps;
+	InitialOffset offsets;
 };
 
 class pigpioServo
