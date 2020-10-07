@@ -7,11 +7,14 @@
 #include <fstream>
 #include <string>
 #include <memory>
+#include <math.h>
 #include "../include/pigpioServo.h"
 
 #include "../include/rplidar/rplidar.h" //RPLIDAR standard sdk, all-in-one header
 #include "../include/Scanner.h"
 #include "../include/Manager.h"
+
+#define PI 3.14159265
 
 using namespace rp::standalone::rplidar;
 
@@ -195,6 +198,41 @@ void PrintServoConfigs(const std::vector<ServoConfig*> configs)
 		std::cout << "\n    offsetX:            " << configs[i]->offsets.offsetX;
 		std::cout << "\n    offsetY:            " << configs[i]->offsets.offsetY << std::endl;
 	}
+}
+
+double GetRelativeAngle(double abs_angle_deg, double abs_distance, InitialOffset servo_offsets)
+{
+	// This method takes in an angle and distance found by the lidar as well as the relative position
+	// of a servo and returns the angle the servo would need to point toward the same spot.
+
+	// For the purposes of this calculation, the lidar is considered to be at the origin of
+	// the coordinate plane with the front of the lidar aligned along the positive y axis.
+
+	// 1. Convert angle to radians for math.h
+	double abs_angle_rad = (abs_angle_deg * PI) / 180.0;
+	// 2. Figure out the absolute x and y postions of the spot
+
+	double y_relative_to_lidar = sin (abs_angle_rad) * abs_distance;
+	double x_relative_to_lidar = cos (abs_angle_rad) * abs_distance;
+
+	// 3. Figure out the relative x and y distances to the servo
+	double y_relative_to_servo = y_relative_to_lidar + servo_offsets.offsetY;
+	double x_relative_to_servo = x_relative_to_lidar + servo_offsets.offsetX;
+
+	// 4. Get inverse tangent from 3.
+	double rel_angle_rad = atan(y_relative_to_servo/x_relative_to_servo);
+
+	// 5. Convert back to degrees
+	double rel_angle_deg = rel_angle_rad * (180.0 / PI);
+
+	// 6. Account for the initial offset angle of the servo itself
+	rel_angle_deg -= servo_offsets.offsetAngle;
+
+	std::cout << "Y is " << y_relative_to_lidar << ", and X is " << x_relative_to_lidar << std::endl;
+	std::cout << "Rel Y is " << y_relative_to_servo << ", and Rel X is " << x_relative_to_servo << std::endl;
+	std::cout << "Abs angle is " << abs_angle_deg << ", and Rel angle is " << rel_angle_deg << std::endl;
+
+	return rel_angle_deg;
 }
 
 int main(int argc, char *argv[])
