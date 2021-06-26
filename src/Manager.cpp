@@ -123,6 +123,8 @@ void Manager::InitializeLEDs()
 	}
 	_calibration_LED_pin = CALIBRATION_LED_PIN;
 	gpioSetMode(_calibration_LED_pin, PI_OUTPUT);
+
+	// TODO: cycle through ghouls and initialize their eyes. Maybe do it else where?
 }
 
 void Manager::ToggleLED(int pin, int state)

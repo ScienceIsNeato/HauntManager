@@ -1,3 +1,6 @@
+#ifndef __PIGPIO_SERVO_H__
+#define __PIGPIO_SERVO_H__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -42,6 +45,7 @@ struct ServoConfig
 	int gpio_pin;
 	AngleMaps angle_maps;
 	InitialOffset offsets;
+	bool is_horizontal;
 };
 
 class pigpioServo
@@ -70,3 +74,5 @@ private:
 	int AngleToPulseWidth(double angle);
 	int _last_pos;
 };
+
+#endif // __PIGPIO_SERVO_H__

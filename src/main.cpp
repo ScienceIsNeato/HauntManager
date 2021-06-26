@@ -13,6 +13,7 @@
 #include "../include/rplidar/rplidar.h" //RPLIDAR standard sdk, all-in-one header
 #include "../include/Scanner.h"
 #include "../include/Manager.h"
+#include "../include/Ghoul.h"
 
 #define PI 3.14159265
 
@@ -45,7 +46,7 @@ void on_finished(RPlidarDriver * drv, Scanner *scanner)
 }
 
 // TODO move this parser and reader?
-bool ReadServoConfig(std::vector<ServoConfig*> &configs)
+bool ReadConfig(std::vector<Ghoul*> &ghouls)
 {
 	std::cout << "Reading servo configurations...\n";
 	std::ifstream infile("servo_config.conf");
@@ -57,6 +58,7 @@ bool ReadServoConfig(std::vector<ServoConfig*> &configs)
 	}
 
 	ServoConfig *current_config = new ServoConfig();
+	Ghoul *current_ghoul;
 
 	//while (infile >> key >> val)
 	std::string line;
@@ -67,6 +69,7 @@ bool ReadServoConfig(std::vector<ServoConfig*> &configs)
 	size_t first;
 	size_t last;
 
+	// TODO: move all this config reading jazz to a config reader
 	while(getline (infile, line))
 	{
 		// Skip blank lines
@@ -109,12 +112,21 @@ bool ReadServoConfig(std::vector<ServoConfig*> &configs)
 		last = val.find_last_not_of(' ');
 		val = val.substr(first, (last-first+1));
 
-		if(key == "SERVO_NAME")
+		if(key == "GHOUL")
+		{
+			// TODO handle multiple ghouls
+			current_ghoul = new Ghoul(val);
+		} 
+		else if(key == "SERVO_NAME")
 		{
 			// Found a config for a new servo. Add last one to vector if not already done.
-			if(current_config->name != "")
+			if(current_config->is_horizontal)
 			{
-				configs.push_back(current_config);
+				current_ghoul->SetHorizServo(current_config);
+			}
+			else
+			{
+				current_ghoul->SetVertServo(current_config);
 			}
 			current_config = new ServoConfig();
 			current_config->name = val;
@@ -159,6 +171,25 @@ bool ReadServoConfig(std::vector<ServoConfig*> &configs)
 		{
 			current_config->offsets.offsetY = atoi(val.c_str());
 		}
+		else if(key == "type")
+		{
+			if (val == "horizontal")
+			{
+				current_config->is_horizontal = true;
+			}
+			else
+			{
+				current_config->is_horizontal = false;
+			}
+		}
+		else if(key == "left_eye_pin")
+		{
+			current_ghoul->SetLeftEye(atoi(val.c_str()));
+		}
+		else if(key == "right_eye_pin")
+		{
+			current_ghoul->SetRightEye(atoi(val.c_str()));
+		}
 		else
 		{
 			std::cout << "Unknown KEY, VALUE pair: " << key << ", " << val;
@@ -166,38 +197,22 @@ bool ReadServoConfig(std::vector<ServoConfig*> &configs)
 		}
 	}
 
-	// Done parsing the config. Add it to the vector and return.
-	configs.push_back(current_config);
+	// There's probably another servo that still needs to be added in. This is ugly and should be fixed.
+	if(current_config->is_horizontal)
+	{
+		current_ghoul->SetHorizServo(current_config);
+	}
+	else
+	{
+		current_ghoul->SetVertServo(current_config);
+	}
 
-	std::cout << "Parsing complete - loaded " << configs.size() << " servo configurations.\n";
+	// TODO handle multiple ghouls
+	ghouls.push_back(current_ghoul);
+
+	std::cout << "Parsing complete - loaded " << ghouls.size() << " ghoul configurations.\n";
 
 	return true;
-}
-
-void PrintServoConfigs(const std::vector<ServoConfig*> configs)
-{
-	int count = configs.size();
-	if(count < 1)
-	{
-		std::cout << "No servo configs to print - this is gonna be a problem...\n";
-		return;
-	}
-	std::cout << "Printing " << count << " servo configurations:\n";
-
-	for (int i = 0; i < count; i++)
-	{
-		std::cout << "\nSERVO_NAME:             " << configs[i]->name;
-		std::cout << "\n    gpio_pin:           " << configs[i]->gpio_pin;
-		std::cout << "\n    right.angle:        " << configs[i]->angle_maps.right_map.angle;
-		std::cout << "\n    center.angle:       " << configs[i]->angle_maps.center_map.angle;
-		std::cout << "\n    left.angle:         " << configs[i]->angle_maps.left_map.angle;
-		std::cout << "\n    right.pulse_width:  " << configs[i]->angle_maps.right_map.pulse_width;
-		std::cout << "\n    center.pulse_width: " << configs[i]->angle_maps.center_map.pulse_width;
-		std::cout << "\n    left.pulse_width:   " << configs[i]->angle_maps.left_map.pulse_width;
-		std::cout << "\n    offsetAngle:        " << configs[i]->offsets.offsetAngle;
-		std::cout << "\n    offsetX:            " << configs[i]->offsets.offsetX;
-		std::cout << "\n    offsetY:            " << configs[i]->offsets.offsetY << std::endl;
-	}
 }
 
 double GetRelativeAngle(double abs_angle_deg, double abs_distance, InitialOffset servo_offsets)
@@ -238,9 +253,8 @@ double GetRelativeAngle(double abs_angle_deg, double abs_distance, InitialOffset
 int main(int argc, char *argv[])
 {
 	// Load servo configuration from file
-	std::vector<ServoConfig*> configs;
-	bool read_success = ReadServoConfig(configs);
-	PrintServoConfigs(configs);
+	std::vector<Ghoul*> ghouls;
+	bool read_success = ReadConfig(ghouls);
 
 	if(!read_success)
 	{
@@ -248,8 +262,15 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	ServoConfig *config = configs[0]; // TODO handle multiple
-	std::shared_ptr<pigpioServo> servo = std::make_shared<pigpioServo>(config->gpio_pin, config->angle_maps, config->offsets);
+	Ghoul *ghoul = ghouls[0];
+	
+	if (!(ghoul->Ready()))
+	{
+		std::cout << "\n Config read successfully but Ghouls not ready - exiting." << std::endl;
+		exit(1);
+	}
+
+	std::shared_ptr<pigpioServo> servo = ghoul->GetHorizServo(); // TODO handle multiple
 	// END Servo setup
 
 	signal(SIGINT, ctrlc); // set signal handler for control c
@@ -296,6 +317,9 @@ int main(int argc, char *argv[])
 			{
 				std::cout << "\n sending servo angle of " << corrected_angle << std::flush;
 				servo->TurnToAngle(corrected_angle);
+
+				// Just a little thing to test class
+				corrected_angle > 90 ? ghoul->OpenEyes(): ghoul->CloseEyes();
 			}
 			else
 			{

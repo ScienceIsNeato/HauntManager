@@ -1,3 +1,6 @@
+#ifndef __SCANNER_H__
+#define __SCANNER_H__
+
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,3 +77,4 @@ private:
 	std::vector<DeadZone> _dead_zones;
 };
 
+#endif // __SCANNER_H__

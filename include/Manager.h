@@ -1,3 +1,6 @@
+#ifndef __MANAGER_H__
+#define __MANAGER_H__
+
 #pragma once
 
 #include "Scanner.h"
@@ -43,7 +46,7 @@ public:
 	/******** LIGHTING *******************/
 	// --------- methods ----------
 	void InitializeLEDs();
-	void ToggleLED(int pin, int state);
+	static void ToggleLED(int pin, int state);
 	//--------- variables ----------
 	int _calibration_LED_pin;
 
@@ -65,6 +68,7 @@ public:
 	FILE *_heartbeat_fh;
 };
 
+#endif // __MANAGER_H__
 
 
 
