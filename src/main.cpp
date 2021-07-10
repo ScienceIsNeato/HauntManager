@@ -57,7 +57,7 @@ bool ReadConfig(std::vector<Ghoul*> &ghouls)
 		return false;
 	}
 
-	ServoConfig *current_config = new ServoConfig();
+	ServoConfig *current_config = nullptr;
 	Ghoul *current_ghoul;
 
 	//while (infile >> key >> val)
@@ -119,17 +119,23 @@ bool ReadConfig(std::vector<Ghoul*> &ghouls)
 		} 
 		else if(key == "SERVO_NAME")
 		{
-			// Found a config for a new servo. Add last one to vector if not already done.
-			if(current_config->is_horizontal)
+			if (current_config)
 			{
-				current_ghoul->SetHorizServo(current_config);
+				// Found a config for a new servo. Add last one to vector if not already done.
+				if(current_config->is_horizontal)
+				{
+					current_ghoul->SetHorizServo(current_config);
+				}
+				else
+				{
+					current_ghoul->SetVertServo(current_config);
+				}
 			}
 			else
 			{
-				current_ghoul->SetVertServo(current_config);
+				current_config = new ServoConfig();
+				current_config->name = val;
 			}
-			current_config = new ServoConfig();
-			current_config->name = val;
 		}
 		else if(key == "gpio_pin")
 		{
@@ -198,13 +204,16 @@ bool ReadConfig(std::vector<Ghoul*> &ghouls)
 	}
 
 	// There's probably another servo that still needs to be added in. This is ugly and should be fixed.
-	if(current_config->is_horizontal)
+	if(current_config->gpio_pin > 0)
 	{
-		current_ghoul->SetHorizServo(current_config);
-	}
-	else
-	{
-		current_ghoul->SetVertServo(current_config);
+		if(current_config->is_horizontal)
+		{
+			current_ghoul->SetHorizServo(current_config);
+		}
+		else
+		{
+			current_ghoul->SetVertServo(current_config);
+		}
 	}
 
 	// TODO handle multiple ghouls
@@ -270,8 +279,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	std::shared_ptr<pigpioServo> servo = ghoul->GetHorizServo(); // TODO handle multiple
-	// END Servo setup
+	std::shared_ptr<pigpioServo> servo = ghoul->GetHorizServo();	// END Servo setup
 
 	signal(SIGINT, ctrlc); // set signal handler for control c
 
@@ -306,28 +314,23 @@ int main(int argc, char *argv[])
 
 		if (res.valid && res.closest_distance < manager->calibration_values[res.closest_index])
 		{
-			printf("\nshortest theta: %03.2f shortest Dist: %08.2f calibration Dist: %08.2f",
-				res.closest_angle,
-				res.closest_distance,
-				manager->calibration_values[res.closest_index]
-			);
 			double corrected_angle = res.closest_angle - 90;
 
 			if ((corrected_angle > 0.0) && (corrected_angle < 180.0))
 			{
-				std::cout << "\n sending servo angle of " << corrected_angle << std::flush;
+				std::cout << "+" << std::flush;
+				ghoul->ProcessEvent(res.closest_distance, corrected_angle, true);
 				servo->TurnToAngle(corrected_angle);
-
-				// Just a little thing to test class
-				corrected_angle > 90 ? ghoul->OpenEyes(): ghoul->CloseEyes();
 			}
 			else
 			{
+				ghoul->ProcessEvent(0, 0, false);  // alert ghoul that movement is behind scanner
 				std::cout << "-" << std::flush;
 			}
 		}
 		else
 		{
+			ghoul->ProcessEvent(0, 0, false);  // alert ghoul that there's nothing to track
 			std::cout << "." << std::flush;
 		}
 	}
