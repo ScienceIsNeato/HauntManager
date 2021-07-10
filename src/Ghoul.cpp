@@ -181,7 +181,7 @@ bool Ghoul::ShouldWakeUp(bool motion_detected)
 
 	timeval now;
 	gettimeofday(&now, 0);
-	double elapsed = double(now.tv_usec - _time_fell_asleep.tv_usec);
+	double elapsed = double(now.tv_sec - _time_fell_asleep.tv_sec);
 
 	if (elapsed > _min_time_to_wake)
 	{
@@ -204,7 +204,7 @@ bool Ghoul::ShouldGoToSleep()
 
 	timeval now;
 	gettimeofday(&now, 0);
-	double elapsed = double(now.tv_usec- _last_time_awake.tv_sec);
+	double elapsed = double(now.tv_sec- _last_time_awake.tv_sec);
 
 	if (elapsed  > _min_time_to_sleep)
 	{
@@ -212,7 +212,6 @@ bool Ghoul::ShouldGoToSleep()
 		std::cout << "\nGhoul::ShouldGoToSleep --> Returning True!!" << std::endl;
 		return true;
 	}
-
 	return false;
 }
 
@@ -287,5 +286,8 @@ void Ghoul::Track(double distance, double angle)
 				distance
 				//, manager->calibration_values[res.closest_index]
 			);
-	_horiz_servo->TurnToAngle(angle);
+	if (_state == AWAKE)
+	{
+		_horiz_servo->TurnToAngle(angle);
+	}
 }

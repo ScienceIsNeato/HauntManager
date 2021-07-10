@@ -48,6 +48,11 @@ void printWelcomeStatement()
 	std::cout << "Press CNTRL + C now if you're worried. Otherwise, let's go!\n\n";
 }
 
+void printUsage()
+{
+	std::cout << "\n\nUsage: `sudo ./calibrate <gpio_pin>`" << std::endl;
+}
+
 void printExitStatement(AngleMap center_val, AngleMap right_val, AngleMap left_val)
 {
 	std::cout << "\nGreat job! Recentering servo for minimal wear...\n";
@@ -184,6 +189,11 @@ int main(int argc, char *argv[])
 	if (argc == 2)
 	{
 		gpio_pin = atoi(argv[1]);
+	}
+	else
+	{
+		std::cout << "\nError - gpio servo pin not provided!\n";
+		printUsage();
 	}
 
 	gpioServo(gpio_pin, 1500);

@@ -48,6 +48,8 @@ void on_finished(RPlidarDriver * drv, Scanner *scanner)
 // TODO move this parser and reader?
 bool ReadConfig(std::vector<Ghoul*> &ghouls)
 {
+	// TODO: I tried to load an old config and this segfaulted. You should fix that.
+
 	std::cout << "Reading servo configurations...\n";
 	std::ifstream infile("servo_config.conf");
 
