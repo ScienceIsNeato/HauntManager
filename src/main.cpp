@@ -60,7 +60,7 @@ bool ReadConfig(std::vector<Ghoul*> &ghouls)
 	}
 
 	ServoConfig *current_config = nullptr;
-	Ghoul *current_ghoul;
+	Ghoul *current_ghoul = nullptr;
 
 	//while (infile >> key >> val)
 	std::string line;
@@ -116,28 +116,30 @@ bool ReadConfig(std::vector<Ghoul*> &ghouls)
 
 		if(key == "GHOUL")
 		{
-			// TODO handle multiple ghouls
 			current_ghoul = new Ghoul(val);
-		} 
+		}
+		else if(key == "GHOUL_END")
+		{
+			ghouls.push_back(current_ghoul);
+			current_config = nullptr;
+			current_ghoul = nullptr;
+		}
 		else if(key == "SERVO_NAME")
 		{
-			if (current_config)
+			current_config = new ServoConfig();
+			current_config->name = val;
+		}
+		else if(key == "SERVO_END")
+		{
+			if(current_config->is_horizontal)
 			{
-				// Found a config for a new servo. Add last one to vector if not already done.
-				if(current_config->is_horizontal)
-				{
-					current_ghoul->SetHorizServo(current_config);
-				}
-				else
-				{
-					current_ghoul->SetVertServo(current_config);
-				}
+				current_ghoul->SetHorizServo(current_config);
 			}
 			else
 			{
-				current_config = new ServoConfig();
-				current_config->name = val;
+				current_ghoul->SetVertServo(current_config);
 			}
+			current_config = nullptr;
 		}
 		else if(key == "gpio_pin")
 		{
@@ -205,22 +207,6 @@ bool ReadConfig(std::vector<Ghoul*> &ghouls)
 		}
 	}
 
-	// There's probably another servo that still needs to be added in. This is ugly and should be fixed.
-	if(current_config->gpio_pin > 0)
-	{
-		if(current_config->is_horizontal)
-		{
-			current_ghoul->SetHorizServo(current_config);
-		}
-		else
-		{
-			current_ghoul->SetVertServo(current_config);
-		}
-	}
-
-	// TODO handle multiple ghouls
-	ghouls.push_back(current_ghoul);
-
 	std::cout << "Parsing complete - loaded " << ghouls.size() << " ghoul configurations.\n";
 
 	return true;
@@ -273,15 +259,14 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	Ghoul *ghoul = ghouls[0];
-	
-	if (!(ghoul->Ready()))
+	for (auto & ghoul : ghouls)
 	{
-		std::cout << "\n Config read successfully but Ghouls not ready - exiting." << std::endl;
-		exit(1);
+		if (!(ghoul->Ready()))
+		{
+			std::cout << "\n Config read successfully but Ghouls not ready - exiting." << std::endl;
+			exit(1);
+		}
 	}
-
-	std::shared_ptr<pigpioServo> servo = ghoul->GetHorizServo();	// END Servo setup
 
 	signal(SIGINT, ctrlc); // set signal handler for control c
 
@@ -321,19 +306,28 @@ int main(int argc, char *argv[])
 			if ((corrected_angle > 0.0) && (corrected_angle < 180.0))
 			{
 				std::cout << "+" << std::flush;
-				ghoul->ProcessEvent(res.closest_distance, corrected_angle, true);
-				servo->TurnToAngle(corrected_angle);
+				for (auto & ghoul : ghouls)
+				{
+					ghoul->ProcessEvent(res.closest_distance, corrected_angle, true);
+					ghoul->GetHorizServo()->TurnToAngle(corrected_angle);
+				}
 			}
 			else
 			{
-				ghoul->ProcessEvent(0, 0, false);  // alert ghoul that movement is behind scanner
-				std::cout << "-" << std::flush;
+				for (auto & ghoul : ghouls)
+				{
+					ghoul->ProcessEvent(0, 0, false);  // alert ghoul that movement is behind scanner
+					std::cout << "-" << std::flush;
+				}
 			}
 		}
 		else
 		{
-			ghoul->ProcessEvent(0, 0, false);  // alert ghoul that there's nothing to track
-			std::cout << "." << std::flush;
+			for (auto & ghoul : ghouls)
+			{
+				ghoul->ProcessEvent(0, 0, false);  // alert ghoul that there's nothing to track
+				std::cout << "." << std::flush;
+			}
 		}
 	}
 
