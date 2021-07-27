@@ -99,7 +99,7 @@ void pigpioServo::TurnToAngle(double angle)
 	while (pos != new_pos)
 	{
 		//printf("%d \n", pos);
-
+		// TODO: maybe speed things up here?
 		gpioServo(_gpio_pin, pos);
 		pos += step;
 		time_sleep(0.001);
@@ -109,22 +109,23 @@ void pigpioServo::TurnToAngle(double angle)
 
 bool pigpioServo::IsAngleValid(double angle)
 {
+	// TODO: actually do stuff here
 	return true;
 }
 
 int pigpioServo::AngleToPulseWidth(double angle)
 {
 	// full right is smallest pulse width, largest angle (i.e. 180 and 600)
-	// full left is largest pulse width, smallest angle (i.e. 0 and 2300)
+	// full left is largest pulse width, smallest angle (i.e. 0 and 2500)
 	if (angle < _max_left.angle)
 	{
-		std::cout << "WARNING - you just attempted to turn to angle " << angle << " - setting to max_left of " << _max_left.pulse_width << std::flush;
+		std::cout << "WARNING - you just attempted to turn to angle " << angle << " - setting to max_left of " << _max_left.angle << std::flush;
 		return _max_left.pulse_width;
 	}
 	else if (angle > _max_right.angle)
 	{
-		std::cout << "WARNING - you just attempted to turn to angle " << angle << " - setting to max_right of " << _max_left.pulse_width << std::flush;
-		return _max_left.pulse_width;
+		std::cout << "WARNING - you just attempted to turn to angle " << angle << " - setting to max_right of " << _max_right.angle << std::flush;
+		return _max_right.pulse_width;
 	}
 	else if (angle > _center.angle)
 	{

@@ -281,11 +281,7 @@ void Ghoul::ProcessEvent(double distance, double angle, bool motion_found)
 void Ghoul::Track(double distance, double angle)
 {
 	// TODO: calculate new angle based on offset and whatnot
-	printf("\nshortest theta: %03.2f shortest Dist: %08.2f/",
-				angle,
-				distance
-				//, manager->calibration_values[res.closest_index]
-			);
+
 	if (_state == AWAKE)
 	{
 		_horiz_servo->TurnToAngle(angle);

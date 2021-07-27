@@ -309,8 +309,8 @@ int main(int argc, char *argv[])
 				for (auto & ghoul : ghouls)
 				{
 					ghoul->ProcessEvent(res.closest_distance, corrected_angle, true);
-					ghoul->GetHorizServo()->TurnToAngle(corrected_angle);
 				}
+				printf("\nshortest theta: %03.2f shortest Dist: %08.2f/", corrected_angle, res.closest_distance);
 			}
 			else
 			{
