@@ -76,22 +76,22 @@ void printExitStatement(AngleMap center_val, AngleMap min_val, AngleMap max_val)
 	std::cout << "\n\n     sudo ./servo_tester " << gpio_pin << " " << min_val.angle << " " << min_val.pulse_width << " " << center_val.angle << " " << center_val.pulse_width << " " << max_val.angle << " " << max_val.pulse_width << std::endl;
 	std::cout << " \n\nIf that works, you'll want to modify your servo_config.conf to include the following:\n";
 
-	std::cout << "SERVO_NAME:           <i.e. SecondGhoulVertical\n";
+	std::cout << "SERVO_NAME:          <i.e. SecondGhoulVertical>\n";
 	std::cout << "gpio_pin:            " << gpio_pin << std::endl;
 	std::cout << std::endl;
-	std::cout << "min.angle:         " << min_val.angle << std::endl;
+	std::cout << "min.angle:           " << min_val.angle << std::endl;
 	std::cout << "center.angle:        " << center_val.angle << std::endl;
-	std::cout << "max.angle:          " << max_val.angle << std::endl;
+	std::cout << "max.angle:           " << max_val.angle << std::endl;
 	std::cout << std::endl;
-	std::cout << "min.pulse_width:   " << min_val.pulse_width << std::endl;
+	std::cout << "min.pulse_width:     " << min_val.pulse_width << std::endl;
 	std::cout << "center.pulse_width:  " << center_val.pulse_width << std::endl;
-	std::cout << "max.pulse_width:    " << max_val.pulse_width << std::endl;
+	std::cout << "max.pulse_width:     " << max_val.pulse_width << std::endl;
 	std::cout << std::endl;
 	std::cout << "offsetAngle:         0 <or offset angle in degrees>" << std::endl;
 	std::cout << "offsetX:             0 <or x offset in mm>" << std::endl;
 	std::cout << "offsetY:             0 <or y offset in mm>" << std::endl;
 	std::cout << std::endl;
-	std::cout << "type: <vertical/horizontal>       " << std::endl;
+	std::cout << "type:                <vertical/horizontal>" << std::endl;
 	std::cout << std::endl;
 	std::cout << "SERVO_END:           END" << std::endl;
 }
