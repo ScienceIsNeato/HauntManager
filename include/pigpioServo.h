@@ -34,9 +34,9 @@ struct AngleMap
 
 struct AngleMaps
 {
-	AngleMap left_map;
+	AngleMap max_map;
 	AngleMap center_map;
-	AngleMap right_map;
+	AngleMap min_map;
 };
 
 struct ServoConfig
@@ -56,6 +56,7 @@ public:
 	~pigpioServo();
 	void SetBoundaries(AngleMaps boundaries);
 	void SetOffset(InitialOffset offset);
+	InitialOffset GetOffsets();
 	void SetGpioPin(int pin);
 	bool Initialize();
 	void Stop();
@@ -65,9 +66,9 @@ public:
 private:
 	InitialOffset _initial_offset;
 	int _gpio_pin;
-	AngleMap _max_left;
+	AngleMap _max;
 	AngleMap _center;
-	AngleMap _max_right;
+	AngleMap _min;
 	int default_pulsewidth;
 	int current_pulsewidth;
 

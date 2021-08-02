@@ -29,14 +29,19 @@ pigpioServo::~pigpioServo()
 
 void pigpioServo::SetBoundaries(AngleMaps boundaries)
 {
-	_max_left = boundaries.left_map;
+	_max = boundaries.max_map;
 	_center = boundaries.center_map;
-	_max_right = boundaries.right_map;
+	_min = boundaries.min_map;
 }
 
 void pigpioServo::SetOffset(InitialOffset offset)
 {
 	_initial_offset = offset;
+}
+
+InitialOffset pigpioServo::GetOffsets()
+{
+	return _initial_offset;
 }
 
 void pigpioServo::SetGpioPin(int pin)
@@ -115,32 +120,32 @@ bool pigpioServo::IsAngleValid(double angle)
 
 int pigpioServo::AngleToPulseWidth(double angle)
 {
-	// full right is smallest pulse width, largest angle (i.e. 180 and 600)
-	// full left is largest pulse width, smallest angle (i.e. 0 and 2500)
-	if (angle < _max_left.angle)
+	// min angle is largest pulse width (i.e. 0 and 2300)
+	// max angle is smallest pulse width (i.e. 180 and 600)
+	if (angle > _max.angle)
 	{
-		std::cout << "WARNING - you just attempted to turn to angle " << angle << " - setting to max_left of " << _max_left.angle << std::flush;
-		return _max_left.pulse_width;
+		std::cout << "WARNING - you just attempted to turn to angle " << angle << " - setting to max angle of " << _max.angle << std::flush;
+		return _max.pulse_width;
 	}
-	else if (angle > _max_right.angle)
+	else if (angle < _min.angle)
 	{
-		std::cout << "WARNING - you just attempted to turn to angle " << angle << " - setting to max_right of " << _max_right.angle << std::flush;
-		return _max_right.pulse_width;
-	}
-	else if (angle > _center.angle)
-	{
-		// Turning right
-		double percent_span = (angle - _center.angle) / (_max_right.angle - _center.angle);
-		double pulse_width_delta = (_max_right.pulse_width - _center.pulse_width) * percent_span;
-		int new_pulse_width = _center.pulse_width + pulse_width_delta;
-		return new_pulse_width;
+		std::cout << "WARNING - you just attempted to turn to angle " << angle << " - setting to min angle of " << _min.angle << std::flush;
+		return _min.pulse_width;
 	}
 	else if (angle < _center.angle)
 	{
-		// Turning left
-		double percent_span = (angle - _max_left.angle) / (_max_right.angle - _center.angle - _max_left.angle);
-		double pulse_width_delta = (_center.pulse_width - _max_left.pulse_width) * percent_span;
-		int new_pulse_width = _max_left.pulse_width + pulse_width_delta;
+		// Turning less than center
+		double percent_span = (angle - _min.angle) / (_center.angle - _min.angle);
+		double pulse_width_delta = (_center.pulse_width - _min.pulse_width) * percent_span;
+		int new_pulse_width = _min.pulse_width + pulse_width_delta;
+		return new_pulse_width;
+	}
+	else if (angle > _center.angle)
+	{
+		// Turning more than center
+		double percent_span = (angle - _center.angle) / (_max.angle - _center.angle);
+		double pulse_width_delta = (_max.pulse_width - _center.pulse_width) * percent_span;
+		int new_pulse_width = _center.pulse_width + pulse_width_delta;
 		return new_pulse_width;
 	}
 	else

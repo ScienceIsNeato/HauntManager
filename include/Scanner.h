@@ -67,6 +67,9 @@ public:
 	// Get raw values for a single pass
 	ScanResult Scan(RPlidarDriver * drv, double(calibration_values)[NUM_SAMPLE_POINTS]);
 
+	// Correct odd coordinate plane results
+	double CorrectAngle(double angle);
+
 	// Return false if point is in a dead zone
 	bool ShouldProcess(double angle, double distance);
 

@@ -14,34 +14,34 @@ int main(int argc, char *argv[])
 	int gpio_pin = 17;
 
 	AngleMap center;
-	AngleMap right;
-	AngleMap left;
+	AngleMap min;
+	AngleMap max;
 
 	if (argc == 8)
 	{
 		gpio_pin = atoi(argv[1]);
 
-		right.angle = atoi(argv[2]);
-		right.pulse_width = atoi(argv[3]);
+		min.angle = atoi(argv[2]);
+		min.pulse_width = atoi(argv[3]);
 
 		center.angle = atoi(argv[4]);
 		center.pulse_width = atoi(argv[5]);
 
-		left.angle = atoi(argv[6]);
-		left.pulse_width = atoi(argv[7]);
+		max.angle = atoi(argv[6]);
+		max.pulse_width = atoi(argv[7]);
 		std::cout << "\nGood job!\n";
 		std::cout << "center angle is " << center.angle << "and pulse is " << center.pulse_width << std::endl;
 	}
 	else
 	{
 		std::cout << "\nYou called me wrong. Call me like this:\n";
-		std::cout << "    sudo ./servo_tester <gpio_pin> <right_angle> <right_pulse> <center_angle> <center_pulse> <left_angle> <left_pulse>\n\n";
+		std::cout << "    sudo ./servo_tester <gpio_pin> <min_angle> <min_pulse> <center_angle> <center_pulse> <max_angle> <max_pulse>\n\n";
 		exit(1);
 	}
 
 	angle_maps.center_map = center;
-	angle_maps.right_map = right;
-	angle_maps.left_map = left;
+	angle_maps.min_map = min;
+	angle_maps.max_map = max;
 
 	InitialOffset offset;
 	offset.offsetAngle = 90;
