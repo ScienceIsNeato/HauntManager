@@ -19,7 +19,7 @@
 int gpio_pin;
 int last_pos = 1500; // default center 
 
-const std::string typical_angles[] = { "90", "180", "0" }; // indices match to #defs for CENTER/MIN/MAX above
+const std::string typical_angles[] = { "90", "0", "180" }; // indices match to #defs for CENTER/MIN/MAX above
 const std::string typical_pulse_widths[] = { "1500", "2300", "700" }; // indices match to #defs for CENTER/MIN/MAX above
 
 struct AngleMap
