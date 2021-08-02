@@ -9,7 +9,7 @@ else
 fi
 
 echo ""
-echo "Assuming you've already modified main with your servo details, run this binary like this"
+echo "Assuming you've already modified servo_config.conf with your ghoul details, run this binary like this"
 echo ""
 echo "    'sudo ./haunt_manager'"
 echo ""

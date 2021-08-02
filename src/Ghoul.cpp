@@ -286,10 +286,8 @@ void Ghoul::Track(double distance, double angle)
 	if (_state == AWAKE)
 	{
 		// Get the relative angle and distance to the object from the perspective of the servo
-		printf("\nGHOUL INCOMING: %s, dist: %4.1fmm,  angle: %4.1f°/", _name.c_str(), distance, angle);
-
-		double rel_angle = GetRelativeAngle(distance, angle);
-		double rel_dist = GetRelativeDistance(distance, angle); // Don't actually need to call this, but it is available for debugging
+		double rel_angle = GetRelativeAngle(angle, distance);
+		double rel_dist = GetRelativeDistance(angle, distance); // Don't actually need to call this, but it is available for debugging
 
 		printf("\nGHOUL: %s, rel_dist: %4.1fmm,  rel_angle: %4.1f°/", _name.c_str(), rel_dist, rel_angle);
 
@@ -315,36 +313,30 @@ double Ghoul::GetRelativeAngle(double abs_angle_deg, double abs_distance)
 
 	   For the purposes of this calculation, the lidar is considered to be at the origin of
 	   the coordinate plane with the front of the lidar aligned along the positive y axis.
-
-	   For some reason, the incoming angle is on this sort of plane:
-
-			90
-			|
-			|
-	   0---------180
-
-	   so let's turn that around
 	*/
-	double corrected_angle = 180 - abs_angle_deg;
 
 	// Shortcuts
-	double theta_rad = DegreesToRadians(corrected_angle);
+	double theta_rad = DegreesToRadians(abs_angle_deg);
 	double x_off = _horiz_servo->GetOffsets().offsetX; // in mm
 	double y_off = _horiz_servo->GetOffsets().offsetY; // in mm
 	
-	double xLIDAR = abs_distance*sin(theta_rad);
-	double yLIDAR = abs_distance*cos(theta_rad);
+	double xLIDAR = abs_distance*cos(theta_rad);
+	double yLIDAR = abs_distance*sin(theta_rad);
 	
-	double inverse_tangent_rad = atan2( (yLIDAR - x_off),(xLIDAR - y_off) );
-	// double inverse_tangent_deg = RadiansToDegrees(inverse_tangent_rad);
-	// std::cout<<"xLIDAR: " << xLIDAR << ", yLIDAR: " << yLIDAR << ", atan: " << inverse_tangent_deg << std::endl;
+	double inverse_tangent_rad = atan2( (xLIDAR - x_off),(yLIDAR - y_off) );
 
 	double ret_val_rads = PI/2 - inverse_tangent_rad;
 	double ret_val_degrees = RadiansToDegrees(ret_val_rads);
 	
 	if (ret_val_degrees < 0)
 	{
-	    ret_val_degrees += 360;
+		//std::cout << "MINIMAL CORRECTION" << std::endl;
+		ret_val_degrees += 360;
+	}
+	else if (ret_val_degrees > 360)
+	{
+		//std::cout << "MAXIMAL CORRECTION" << std::endl;
+		ret_val_degrees -= 360;
 	}
 	
 	return ret_val_degrees + _horiz_servo->GetOffsets().offsetAngle;
