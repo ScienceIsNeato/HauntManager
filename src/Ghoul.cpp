@@ -6,6 +6,9 @@
 #include <ctime>
 #include <unistd.h>
 #include <sys/time.h>
+#include <math.h>
+
+#define PI 3.14159265
 
 Ghoul::Ghoul(std::string name)
 {
@@ -120,24 +123,24 @@ void Ghoul::PrintConfig()
 
 	std::cout << "\n  HORIZONTAL SERVO:     " << _horiz_servo_config->name;
 	std::cout << "\n    gpio_pin:           " << _horiz_servo_config->gpio_pin;
-	std::cout << "\n    right.angle:        " << _horiz_servo_config->angle_maps.right_map.angle;
+	std::cout << "\n    min.angle:          " << _horiz_servo_config->angle_maps.min_map.angle;
 	std::cout << "\n    center.angle:       " << _horiz_servo_config->angle_maps.center_map.angle;
-	std::cout << "\n    left.angle:         " << _horiz_servo_config->angle_maps.left_map.angle;
-	std::cout << "\n    right.pulse_width:  " << _horiz_servo_config->angle_maps.right_map.pulse_width;
+	std::cout << "\n    max.angle:          " << _horiz_servo_config->angle_maps.max_map.angle;
+	std::cout << "\n    min.pulse_width:    " << _horiz_servo_config->angle_maps.min_map.pulse_width;
 	std::cout << "\n    center.pulse_width: " << _horiz_servo_config->angle_maps.center_map.pulse_width;
-	std::cout << "\n    left.pulse_width:   " << _horiz_servo_config->angle_maps.left_map.pulse_width;
+	std::cout << "\n    max.pulse_width:    " << _horiz_servo_config->angle_maps.max_map.pulse_width;
 	std::cout << "\n    offsetAngle:        " << _horiz_servo_config->offsets.offsetAngle;
 	std::cout << "\n    offsetX:            " << _horiz_servo_config->offsets.offsetX;
 	std::cout << "\n    offsetY:            " << _horiz_servo_config->offsets.offsetY << std::endl;
 
 	std::cout << "\n  VERTICAL SERVO:       " << _vert_servo_config->name;
 	std::cout << "\n    gpio_pin:           " << _vert_servo_config->gpio_pin;
-	std::cout << "\n    right.angle:        " << _vert_servo_config->angle_maps.right_map.angle;
+	std::cout << "\n    min.angle:          " << _vert_servo_config->angle_maps.min_map.angle;
 	std::cout << "\n    center.angle:       " << _vert_servo_config->angle_maps.center_map.angle;
-	std::cout << "\n    left.angle:         " << _vert_servo_config->angle_maps.left_map.angle;
-	std::cout << "\n    right.pulse_width:  " << _vert_servo_config->angle_maps.right_map.pulse_width;
+	std::cout << "\n    max.angle:          " << _vert_servo_config->angle_maps.max_map.angle;
+	std::cout << "\n    min.pulse_width:    " << _vert_servo_config->angle_maps.min_map.pulse_width;
 	std::cout << "\n    center.pulse_width: " << _vert_servo_config->angle_maps.center_map.pulse_width;
-	std::cout << "\n    left.pulse_width:   " << _vert_servo_config->angle_maps.left_map.pulse_width;
+	std::cout << "\n    max.pulse_width:    " << _vert_servo_config->angle_maps.max_map.pulse_width;
 	std::cout << "\n    offsetAngle:        " << _vert_servo_config->offsets.offsetAngle;
 	std::cout << "\n    offsetX:            " << _vert_servo_config->offsets.offsetX;
 	std::cout << "\n    offsetY:            " << _vert_servo_config->offsets.offsetY << std::endl;
@@ -280,10 +283,85 @@ void Ghoul::ProcessEvent(double distance, double angle, bool motion_found)
 
 void Ghoul::Track(double distance, double angle)
 {
-	// TODO: calculate new angle based on offset and whatnot
-
 	if (_state == AWAKE)
 	{
+		// Get the relative angle and distance to the object from the perspective of the servo
+		printf("\nGHOUL INCOMING: %s, dist: %4.1fmm,  angle: %4.1f°/", _name.c_str(), distance, angle);
+
+		double rel_angle = GetRelativeAngle(distance, angle);
+		double rel_dist = GetRelativeDistance(distance, angle); // Don't actually need to call this, but it is available for debugging
+
+		printf("\nGHOUL: %s, rel_dist: %4.1fmm,  rel_angle: %4.1f°/", _name.c_str(), rel_dist, rel_angle);
+
 		_horiz_servo->TurnToAngle(angle);
 	}
+}
+
+/************ HELPERS **************/
+double Ghoul::DegreesToRadians(double angle_degrees)
+{
+	return (angle_degrees * PI) / 180.0;
+}
+
+double Ghoul::RadiansToDegrees(double angle_radians)
+{
+	return (angle_radians * 180.0) / PI;
+}
+
+double Ghoul::GetRelativeAngle(double abs_angle_deg, double abs_distance)
+{
+	/* This method takes in an angle and distance found by the lidar
+	   and returns the angle the servo would need to point toward the same spot.
+
+	   For the purposes of this calculation, the lidar is considered to be at the origin of
+	   the coordinate plane with the front of the lidar aligned along the positive y axis.
+
+	   For some reason, the incoming angle is on this sort of plane:
+
+			90
+			|
+			|
+	   0---------180
+
+	   so let's turn that around
+	*/
+	double corrected_angle = 180 - abs_angle_deg;
+
+	// Shortcuts
+	double theta_rad = DegreesToRadians(corrected_angle);
+	double x_off = _horiz_servo->GetOffsets().offsetX; // in mm
+	double y_off = _horiz_servo->GetOffsets().offsetY; // in mm
+	
+	double xLIDAR = abs_distance*sin(theta_rad);
+	double yLIDAR = abs_distance*cos(theta_rad);
+	
+	double inverse_tangent_rad = atan2( (yLIDAR - x_off),(xLIDAR - y_off) );
+	// double inverse_tangent_deg = RadiansToDegrees(inverse_tangent_rad);
+	// std::cout<<"xLIDAR: " << xLIDAR << ", yLIDAR: " << yLIDAR << ", atan: " << inverse_tangent_deg << std::endl;
+
+	double ret_val_rads = PI/2 - inverse_tangent_rad;
+	double ret_val_degrees = RadiansToDegrees(ret_val_rads);
+	
+	if (ret_val_degrees < 0)
+	{
+	    ret_val_degrees += 360;
+	}
+	
+	return ret_val_degrees + _horiz_servo->GetOffsets().offsetAngle;
+}
+
+double Ghoul::GetRelativeDistance(double abs_angle_deg, double abs_distance)
+{
+	// This method takes in an angle and distance found by the lidar and returns the absolute distance from the servo to the object.
+
+	// For the purposes of this calculation, the lidar is considered to be at the origin of
+	// the coordinate plane with the front of the lidar aligned along the positive y axis.
+
+	// Shortcuts
+	double theta_rad = (abs_angle_deg * PI) / 180.0;
+	double x_off = _horiz_servo->GetOffsets().offsetX;
+	double y_off = _horiz_servo->GetOffsets().offsetY;
+	double d = abs_distance;
+
+	return sqrt( pow(d*cos(theta_rad) - x_off, 2) + pow(d*sin(theta_rad) - y_off, 2) );
 }

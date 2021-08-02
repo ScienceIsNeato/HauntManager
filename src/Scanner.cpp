@@ -134,6 +134,38 @@ bool Scanner::CheckRPLIDARHealth(RPlidarDriver * drv)
 	}
 }
 
+double Scanner::CorrectAngle(double angle)
+{
+	/* For some reason, the scanner returns results like this
+
+				180
+				|
+				|
+				|
+	90---------------------270
+				|
+				|
+				|
+				0
+
+	We want it like this
+
+				90
+				|
+				|
+				|
+	180---------------------0
+				|
+				|
+				|
+				270
+
+	So, first we reverse the direction of the angle, then we rotate by 90 degrees */
+	double retval = 360 - angle;
+	retval -= 90;
+	return retval;
+}
+
 void Scanner::Close(RPlidarDriver * drv)
 {
 	RPlidarDriver::DisposeDriver(drv);
@@ -269,7 +301,7 @@ ScanResult Scanner::Scan(RPlidarDriver * drv, double(calibration_values)[NUM_SAM
 	ScanResult ret_val;
 	ret_val.valid = false;
 
-	// fetech result and print it out...
+	// fetch result and print it out...
 	rplidar_response_measurement_node_t nodes[NUM_SAMPLE_POINTS];
 	size_t count = _countof(nodes);
 	op_result = drv->grabScanData(nodes, count);

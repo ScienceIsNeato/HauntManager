@@ -56,6 +56,10 @@ class Ghoul
 		void GoToSleep();
 		void Track(double distance, double angle);
 		void ProcessEvent(double distance, double angle, bool motion_found = true);
+		double GetRelativeAngle(double abs_angle_deg, double abs_distance);
+		double GetRelativeDistance(double abs_angle_deg, double abs_distance);
+		static double DegreesToRadians(double angle_degrees);
+		static double RadiansToDegrees(double angle_radians);
 };
 
 #endif // __GHOUL_H__

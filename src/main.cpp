@@ -7,15 +7,12 @@
 #include <fstream>
 #include <string>
 #include <memory>
-#include <math.h>
 #include "../include/pigpioServo.h"
 
 #include "../include/rplidar/rplidar.h" //RPLIDAR standard sdk, all-in-one header
 #include "../include/Scanner.h"
 #include "../include/Manager.h"
 #include "../include/Ghoul.h"
-
-#define PI 3.14159265
 
 using namespace rp::standalone::rplidar;
 
@@ -49,6 +46,7 @@ void on_finished(RPlidarDriver * drv, Scanner *scanner)
 bool ReadConfig(std::vector<Ghoul*> &ghouls)
 {
 	// TODO: I tried to load an old config and this segfaulted. You should fix that.
+	// TODO: Move config reader and printer to its own class
 
 	std::cout << "Reading servo configurations...\n";
 	std::ifstream infile("servo_config.conf");
@@ -145,29 +143,29 @@ bool ReadConfig(std::vector<Ghoul*> &ghouls)
 		{
 			current_config->gpio_pin = atoi(val.c_str());
 		}
-		else if(key == "right.angle")
+		else if(key == "min.angle")
 		{
-			current_config->angle_maps.right_map.angle = atoi(val.c_str());
+			current_config->angle_maps.min_map.angle = atoi(val.c_str());
 		}
 		else if(key == "center.angle")
 		{
 			current_config->angle_maps.center_map.angle = atoi(val.c_str());
 		}
-		else if(key == "left.angle")
+		else if(key == "max.angle")
 		{
-			current_config->angle_maps.left_map.angle = atoi(val.c_str());
+			current_config->angle_maps.max_map.angle = atoi(val.c_str());
 		}
-		else if(key == "right.pulse_width")
+		else if(key == "min.pulse_width")
 		{
-			current_config->angle_maps.right_map.pulse_width = atoi(val.c_str());
+			current_config->angle_maps.min_map.pulse_width = atoi(val.c_str());
 		}
 		else if(key == "center.pulse_width")
 		{
 			current_config->angle_maps.center_map.pulse_width = atoi(val.c_str());
 		}
-		else if(key == "left.pulse_width")
+		else if(key == "max.pulse_width")
 		{
-			current_config->angle_maps.left_map.pulse_width = atoi(val.c_str());
+			current_config->angle_maps.max_map.pulse_width = atoi(val.c_str());
 		}
 		else if(key == "offsetAngle")
 		{
@@ -210,41 +208,6 @@ bool ReadConfig(std::vector<Ghoul*> &ghouls)
 	std::cout << "Parsing complete - loaded " << ghouls.size() << " ghoul configurations.\n";
 
 	return true;
-}
-
-double GetRelativeAngle(double abs_angle_deg, double abs_distance, InitialOffset servo_offsets)
-{
-	// This method takes in an angle and distance found by the lidar as well as the relative position
-	// of a servo and returns the angle the servo would need to point toward the same spot.
-
-	// For the purposes of this calculation, the lidar is considered to be at the origin of
-	// the coordinate plane with the front of the lidar aligned along the positive y axis.
-
-	// 1. Convert angle to radians for math.h
-	double abs_angle_rad = (abs_angle_deg * PI) / 180.0;
-	// 2. Figure out the absolute x and y postions of the spot
-
-	double y_relative_to_lidar = sin (abs_angle_rad) * abs_distance;
-	double x_relative_to_lidar = cos (abs_angle_rad) * abs_distance;
-
-	// 3. Figure out the relative x and y distances to the servo
-	double y_relative_to_servo = y_relative_to_lidar + servo_offsets.offsetY;
-	double x_relative_to_servo = x_relative_to_lidar + servo_offsets.offsetX;
-
-	// 4. Get inverse tangent from 3.
-	double rel_angle_rad = atan(y_relative_to_servo/x_relative_to_servo);
-
-	// 5. Convert back to degrees
-	double rel_angle_deg = rel_angle_rad * (180.0 / PI);
-
-	// 6. Account for the initial offset angle of the servo itself
-	rel_angle_deg -= servo_offsets.offsetAngle;
-
-	std::cout << "Y is " << y_relative_to_lidar << ", and X is " << x_relative_to_lidar << std::endl;
-	std::cout << "Rel Y is " << y_relative_to_servo << ", and Rel X is " << x_relative_to_servo << std::endl;
-	std::cout << "Abs angle is " << abs_angle_deg << ", and Rel angle is " << rel_angle_deg << std::endl;
-
-	return rel_angle_deg;
 }
 
 int main(int argc, char *argv[])
@@ -301,7 +264,8 @@ int main(int argc, char *argv[])
 
 		if (res.valid && res.closest_distance < manager->calibration_values[res.closest_index])
 		{
-			double corrected_angle = res.closest_angle - 90;
+			double corrected_angle = scanner->CorrectAngle(res.closest_angle);
+			printf("\nLIDAR: dist: %4.1fmm,  angle: %4.1f°/", res.closest_distance, corrected_angle);
 
 			if ((corrected_angle > 0.0) && (corrected_angle < 180.0))
 			{
@@ -310,7 +274,6 @@ int main(int argc, char *argv[])
 				{
 					ghoul->ProcessEvent(res.closest_distance, corrected_angle, true);
 				}
-				printf("\nshortest theta: %03.2f shortest Dist: %08.2f/", corrected_angle, res.closest_distance);
 			}
 			else
 			{

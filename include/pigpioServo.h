@@ -56,6 +56,7 @@ public:
 	~pigpioServo();
 	void SetBoundaries(AngleMaps boundaries);
 	void SetOffset(InitialOffset offset);
+	InitialOffset GetOffsets();
 	void SetGpioPin(int pin);
 	bool Initialize();
 	void Stop();

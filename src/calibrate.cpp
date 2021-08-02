@@ -13,14 +13,14 @@
 #define DEFAULT_CENTER_PULSE 1500
 
 #define CENTER 0
-#define RIGHT 1
-#define LEFT 2
+#define MAX 1
+#define MAX 2
 
 int gpio_pin;
 int last_pos = 1500; // default center 
 
-const std::string typical_angles[] = { "90", "180", "0" }; // indices match to #defs for CENTER/RIGHT/LEFT above
-const std::string typical_pulse_widths[] = { "1500", "700", "2300" }; // indices match to #defs for CENTER/RIGHT/LEFT above
+const std::string typical_angles[] = { "90", "180", "0" }; // indices match to #defs for CENTER/MIN/MAX above
+const std::string typical_pulse_widths[] = { "1500", "2300", "700" }; // indices match to #defs for CENTER/MIN/MAX above
 
 struct AngleMap
 {
@@ -45,6 +45,18 @@ void printWelcomeStatement()
 	std::cout << "We'll provide you with hints and guide you along the way.\n";
 	std::cout << "Hopefully, we'll prevent you from destroying your servo.\n";
 	std::cout << "Though, to be honest, we can't promise that.\n\n";
+
+	std::cout << "This will provide calibration values from for a servo on this\n";
+	std::cout << "coordinate plane and the following perspectives:\n";
+	std::cout << "                       90°                         \n";
+	std::cout << "                       |   (60° - ex)             \n";
+	std::cout << "                       |   o                      \n";
+	std::cout << "                       |  /                       \n";
+	std::cout << "                       | /                        \n";
+	std::cout << " (max)  180°--------(SERVO)----------0° (min)     \n";
+	std::cout << "                       |                          \n";
+	std::cout << "                     (You) - (behind servo)       \n";
+
 	std::cout << "Press CNTRL + C now if you're worried. Otherwise, let's go!\n\n";
 }
 
@@ -53,15 +65,15 @@ void printUsage()
 	std::cout << "\n\nUsage: `sudo ./calibrate <gpio_pin>`" << std::endl;
 }
 
-void printExitStatement(AngleMap center_val, AngleMap right_val, AngleMap left_val)
+void printExitStatement(AngleMap center_val, AngleMap min_val, AngleMap max_val)
 {
 	std::cout << "\nGreat job! Recentering servo for minimal wear...\n";
 	std::cout << "\n\nCALIBRATION RESULTS FOR GPIO: (angle, pulse width) for pin " << gpio_pin << ":" << std::endl;
-	std::cout << "    Right    (" << right_val.angle << " degrees, " << right_val.pulse_width << " duty cycle)\n";
-	std::cout << "    Center    (" << center_val.angle << " degrees, " << center_val.pulse_width << " duty cycle)\n";
-	std::cout << "    Left    (" << left_val.angle << " degrees, " << left_val.pulse_width << " duty cycle)\n";
+	std::cout << "    Minimum    (" << min_val.angle << " degrees, " << min_val.pulse_width << " duty cycle)\n";
+	std::cout << "    Center     (" << center_val.angle << " degrees, " << center_val.pulse_width << " duty cycle)\n";
+	std::cout << "    Maximum    (" << max_val.angle << " degrees, " << max_val.pulse_width << " duty cycle)\n";
 	std::cout << "\nNext, you should test these calibration results by running the following command:\n";
-	std::cout << "\n\n     sudo ./servo_tester " << gpio_pin << " " << right_val.angle << " " << right_val.pulse_width << " " << center_val.angle << " " << center_val.pulse_width << " " << left_val.angle << " " << left_val.pulse_width << std::endl;
+	std::cout << "\n\n     sudo ./servo_tester " << gpio_pin << " " << min_val.angle << " " << min_val.pulse_width << " " << center_val.angle << " " << center_val.pulse_width << " " << max_val.angle << " " << max_val.pulse_width << std::endl;
 	std::cout << " \n\nIf that works, modify main.cpp to have your values after \"Begin Servo Setup\"";
 }
 
@@ -113,13 +125,13 @@ int rotate_servo(int last_pos, int new_pos)
 std::string GetPositionString(int pos)
 {
 	std::string pos_string = "center";
-	if (pos == LEFT)
+	if (pos == MAX)
 	{
-		pos_string = "leftmost";
+		pos_string = "maximum";
 	}
-	else if (pos == RIGHT)
+	else if (pos == MIN)
 	{
-		pos_string = "rightmost";
+		pos_string = "minimum";
 	}
 
 	return pos_string;
@@ -200,11 +212,11 @@ int main(int argc, char *argv[])
 
 	printf("Calibration routine starting - control C to stop.\n");
 	AngleMap center_val = GetVal(CENTER);
-	AngleMap right_val = GetVal(RIGHT);
-	AngleMap left_val = GetVal(LEFT);
+	AngleMap min_val = GetVal(MIN);
+	AngleMap max_val = GetVal(MAX);
 
-	printExitStatement(center_val, right_val, left_val);
-	rotate_servo(left_val.pulse_width, center_val.pulse_width); // recenter the servo on our way out
+	printExitStatement(center_val, min_val, max_val);
+	rotate_servo(max_val.pulse_width, center_val.pulse_width); // recenter the servo on our way out
 	stop(0);
 
 	return 0;
