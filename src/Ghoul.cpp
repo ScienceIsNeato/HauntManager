@@ -293,7 +293,7 @@ void Ghoul::Track(double distance, double angle)
 
 		printf("\nGHOUL: %s, rel_dist: %4.1fmm,  rel_angle: %4.1f°/", _name.c_str(), rel_dist, rel_angle);
 
-		_horiz_servo->TurnToAngle(angle);
+		_horiz_servo->TurnToAngle(rel_angle);
 	}
 }
 

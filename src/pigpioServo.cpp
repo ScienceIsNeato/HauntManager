@@ -134,18 +134,18 @@ int pigpioServo::AngleToPulseWidth(double angle)
 	}
 	else if (angle < _center.angle)
 	{
-		// Turning to min direction
-		double percent_span = (angle - _center.angle) / (_min.angle - _center.angle);
-		double pulse_width_delta = (_min.pulse_width - _center.pulse_width) * percent_span;
-		int new_pulse_width = _center.pulse_width + pulse_width_delta;
+		// Turning less than center
+		double percent_span = (angle - _min.angle) / (_center.angle - _min.angle);
+		double pulse_width_delta = (_center.pulse_width - _min.pulse_width) * percent_span;
+		int new_pulse_width = _min.pulse_width + pulse_width_delta;
 		return new_pulse_width;
 	}
 	else if (angle > _center.angle)
 	{
-		// Turning to max direction
-		double percent_span = (angle - _max.angle) / (_min.angle - _center.angle - _max.angle);
-		double pulse_width_delta = (_center.pulse_width - _max.pulse_width) * percent_span;
-		int new_pulse_width = _max.pulse_width + pulse_width_delta;
+		// Turning more than center
+		double percent_span = (angle - _center.angle) / (_max.angle - _center.angle);
+		double pulse_width_delta = (_max.pulse_width - _center.pulse_width) * percent_span;
+		int new_pulse_width = _center.pulse_width + pulse_width_delta;
 		return new_pulse_width;
 	}
 	else
