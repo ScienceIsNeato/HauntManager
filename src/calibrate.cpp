@@ -13,7 +13,7 @@
 #define DEFAULT_CENTER_PULSE 1500
 
 #define CENTER 0
-#define MAX 1
+#define MIN 1
 #define MAX 2
 
 int gpio_pin;
