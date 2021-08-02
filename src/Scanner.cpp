@@ -138,27 +138,27 @@ double Scanner::CorrectAngle(double angle)
 {
 	/* For some reason, the scanner returns results like this
 
-				180
-				|
-				|
-				|
-	90---------------------270
-				|
-				|
-				|
-				0
+                180
+                |
+                |
+                |
+    90---------------------270
+                |
+                |
+                |
+                0
 
 	We want it like this
 
-				90
-				|
-				|
-				|
-	180---------------------0
-				|
-				|
-				|
-				270
+                90
+                |
+                |
+                |
+    180---------------------0
+                |
+                |
+                |
+                270
 
 	So, first we reverse the direction of the angle, then we rotate by 90 degrees */
 	double retval = 360 - angle;

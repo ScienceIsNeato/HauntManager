@@ -287,9 +287,11 @@ void Ghoul::Track(double distance, double angle)
 	{
 		// Get the relative angle and distance to the object from the perspective of the servo
 		double rel_angle = GetRelativeAngle(angle, distance);
-		double rel_dist = GetRelativeDistance(angle, distance); // Don't actually need to call this, but it is available for debugging
 
-		printf("\nGHOUL: %s, rel_dist: %4.1fmm,  rel_angle: %4.1f°/", _name.c_str(), rel_dist, rel_angle);
+		// not used for anything
+		//double rel_dist = GetRelativeDistance(angle, distance); // Don't actually need to call this, but it is available for debugging
+
+		printf("\nGHOUL: %s rel_angle: %4.1f°/", _name.c_str(), rel_angle);
 
 		_horiz_servo->TurnToAngle(rel_angle);
 	}
@@ -355,5 +357,6 @@ double Ghoul::GetRelativeDistance(double abs_angle_deg, double abs_distance)
 	double y_off = _horiz_servo->GetOffsets().offsetY;
 	double d = abs_distance;
 
+	// NOTE untested. Didn't bother since I don't actually need it for anything yet. 
 	return sqrt( pow(d*cos(theta_rad) - x_off, 2) + pow(d*sin(theta_rad) - y_off, 2) );
 }
