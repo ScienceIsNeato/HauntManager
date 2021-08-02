@@ -122,17 +122,17 @@ int pigpioServo::AngleToPulseWidth(double angle)
 {
 	// min angle is largest pulse width (i.e. 0 and 2300)
 	// max angle is smallest pulse width (i.e. 180 and 600)
-	if (angle < _max.angle)
+	if (angle > _max.angle)
 	{
 		std::cout << "WARNING - you just attempted to turn to angle " << angle << " - setting to max angle of " << _max.angle << std::flush;
 		return _max.pulse_width;
 	}
-	else if (angle > _min.angle)
+	else if (angle < _min.angle)
 	{
 		std::cout << "WARNING - you just attempted to turn to angle " << angle << " - setting to min angle of " << _min.angle << std::flush;
 		return _min.pulse_width;
 	}
-	else if (angle > _center.angle)
+	else if (angle < _center.angle)
 	{
 		// Turning to min direction
 		double percent_span = (angle - _center.angle) / (_min.angle - _center.angle);
@@ -140,7 +140,7 @@ int pigpioServo::AngleToPulseWidth(double angle)
 		int new_pulse_width = _center.pulse_width + pulse_width_delta;
 		return new_pulse_width;
 	}
-	else if (angle < _center.angle)
+	else if (angle > _center.angle)
 	{
 		// Turning to max direction
 		double percent_span = (angle - _max.angle) / (_min.angle - _center.angle - _max.angle);
