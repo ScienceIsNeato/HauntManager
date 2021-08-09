@@ -62,6 +62,10 @@ int main(int argc, char *argv[])
 			std::cout << "\n Config read successfully but Ghouls not ready - exiting." << std::endl;
 			exit(1);
 		}
+		else
+		{
+			ConfigParser::PrintConfig(ghoul);
+		}
 	}
 
 	signal(SIGINT, ctrlc); // set signal handler for control c

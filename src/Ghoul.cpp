@@ -138,7 +138,6 @@ bool Ghoul::Ready()
 		gpioSetMode(_left_eye_gpio_pin, PI_OUTPUT);
 		gpioSetMode(_right_eye_gpio_pin, PI_OUTPUT);
 		GoToSleep();
-		ConfigParser::PrintConfig();
 		return true;
 	}
 

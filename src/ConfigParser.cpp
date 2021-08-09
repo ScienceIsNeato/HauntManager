@@ -189,8 +189,8 @@ void ConfigParser::PrintConfig(Ghoul* ghoul)
 	std::cout << "\n    awake.angle:        " << ghoul->GetVertServoConfig()->angle_maps.max_map.angle;
 	std::cout << "\n    asleep.pulse_width: " << ghoul->GetVertServoConfig()->angle_maps.min_map.pulse_width;
 	std::cout << "\n    center.pulse_width: " << ghoul->GetVertServoConfig()->angle_maps.center_map.pulse_width;
-	std::cout << "\n    awake_pulse_width:  " << ghoul->GetVertServoConfig()->angle_maps.max_map.pulse_width;
+	std::cout << "\n    awake_pulse_width:  " << ghoul->GetVertServoConfig()->angle_maps.max_map.pulse_width << std::endl;
 
-	std::cout << "\n  Left Eye LED Pin:     " << ghoul->GetLeftEye() << std::endl;
+	std::cout << "\n  Left Eye LED Pin:     " << ghoul->GetLeftEye();
 	std::cout << "\n  Right Eye LED Pin:    " << ghoul->GetRightEye() << std::endl;
 }
