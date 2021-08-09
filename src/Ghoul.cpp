@@ -1,5 +1,7 @@
 #include "../include/Ghoul.h"
 #include "../include/Manager.h"
+#include "../include/ConfigParser.h"
+
 #include <iostream>
 #include <pigpio.h>
 #include <memory>
@@ -84,6 +86,32 @@ std::shared_ptr<pigpioServo> Ghoul::GetVertServo()
 	return _vert_servo;
 }
 
+/********* GETTERS ****************/
+std::string Ghoul::GetName()
+{
+	return _name;
+}
+
+ServoConfig* Ghoul::GetHorizServoConfig()
+{
+	return _horiz_servo_config;
+}
+
+ServoConfig* Ghoul::GetVertServoConfig()
+{
+	return _vert_servo_config;
+}
+
+int Ghoul::GetLeftEye()
+{
+	return _left_eye_gpio_pin;
+}
+
+int Ghoul::GetRightEye()
+{
+	return _right_eye_gpio_pin;
+}
+
 /********* STATE MACHINE **********/
 
 bool Ghoul::Ready()
@@ -110,43 +138,11 @@ bool Ghoul::Ready()
 		gpioSetMode(_left_eye_gpio_pin, PI_OUTPUT);
 		gpioSetMode(_right_eye_gpio_pin, PI_OUTPUT);
 		GoToSleep();
-		PrintConfig();
+		ConfigParser::PrintConfig();
 		return true;
 	}
 
 	return false;
-}
-
-void Ghoul::PrintConfig()
-{
-	std::cout << "\nGHOUL NAME:  " << _name;
-
-	std::cout << "\n  HORIZONTAL SERVO:     " << _horiz_servo_config->name;
-	std::cout << "\n    gpio_pin:           " << _horiz_servo_config->gpio_pin;
-	std::cout << "\n    min.angle:          " << _horiz_servo_config->angle_maps.min_map.angle;
-	std::cout << "\n    center.angle:       " << _horiz_servo_config->angle_maps.center_map.angle;
-	std::cout << "\n    max.angle:          " << _horiz_servo_config->angle_maps.max_map.angle;
-	std::cout << "\n    min.pulse_width:    " << _horiz_servo_config->angle_maps.min_map.pulse_width;
-	std::cout << "\n    center.pulse_width: " << _horiz_servo_config->angle_maps.center_map.pulse_width;
-	std::cout << "\n    max.pulse_width:    " << _horiz_servo_config->angle_maps.max_map.pulse_width;
-	std::cout << "\n    offsetAngle:        " << _horiz_servo_config->offsets.offsetAngle;
-	std::cout << "\n    offsetX:            " << _horiz_servo_config->offsets.offsetX;
-	std::cout << "\n    offsetY:            " << _horiz_servo_config->offsets.offsetY << std::endl;
-
-	std::cout << "\n  VERTICAL SERVO:       " << _vert_servo_config->name;
-	std::cout << "\n    gpio_pin:           " << _vert_servo_config->gpio_pin;
-	std::cout << "\n    min.angle:          " << _vert_servo_config->angle_maps.min_map.angle;
-	std::cout << "\n    center.angle:       " << _vert_servo_config->angle_maps.center_map.angle;
-	std::cout << "\n    max.angle:          " << _vert_servo_config->angle_maps.max_map.angle;
-	std::cout << "\n    min.pulse_width:    " << _vert_servo_config->angle_maps.min_map.pulse_width;
-	std::cout << "\n    center.pulse_width: " << _vert_servo_config->angle_maps.center_map.pulse_width;
-	std::cout << "\n    max.pulse_width:    " << _vert_servo_config->angle_maps.max_map.pulse_width;
-	std::cout << "\n    offsetAngle:        " << _vert_servo_config->offsets.offsetAngle;
-	std::cout << "\n    offsetX:            " << _vert_servo_config->offsets.offsetX;
-	std::cout << "\n    offsetY:            " << _vert_servo_config->offsets.offsetY << std::endl;
-
-	std::cout << "\n  Left Eye LED Pin:     " << _left_eye_gpio_pin << std::endl;
-	std::cout << "\n  Right Eye LED Pin:    " << _right_eye_gpio_pin << std::endl;
 }
 
 void Ghoul::OpenEyes()
@@ -163,6 +159,7 @@ void Ghoul::CloseEyes()
 
 void Ghoul::BlinkEyes()
 {
+	// TODO: Implement this method?
 	CloseEyes();
 	time_sleep(0.5);
 	OpenEyes();
@@ -220,15 +217,15 @@ bool Ghoul::ShouldGoToSleep()
 
 void Ghoul::WakeUp()
 {
-	std::cout << "\nGhoul::WakeUp Here is where we'd stand up./n";
 	OpenEyes();
 	gettimeofday(&_last_time_awake, 0);
 	_state = AWAKE;
+	_vert_servo->TurnToAngle(_vert_servo_config->angle_maps.max_map.angle);
 }
 
 void Ghoul::GoToSleep()
 {
-	std::cout << "\nGhoul::GoToSleep Here is where we'd lower back down./n";
+	_vert_servo->TurnToAngle(_vert_servo_config->angle_maps.min_map.angle);
 	CloseEyes();
 	gettimeofday(&_time_fell_asleep, 0);
 	_state = ASLEEP;

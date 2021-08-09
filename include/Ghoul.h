@@ -46,7 +46,12 @@ class Ghoul
 		void SetRightEye(int pin);
 		bool Ready();
 
-		void PrintConfig();
+		std::string GetName();
+		ServoConfig* GetHorizServoConfig();
+		ServoConfig* GetVertServoConfig();
+		int GetLeftEye();
+		int GetRightEye();
+
 		void OpenEyes();
 		void CloseEyes();
 		void BlinkEyes();
