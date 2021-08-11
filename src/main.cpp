@@ -134,5 +134,9 @@ int main(int argc, char *argv[])
 
 	on_finished(drv, scanner);
 	std::cout << "\nCleaning up...\n";
+	for (auto & ghoul : ghouls)
+	{
+		ghoul->GoToSleep();
+	}
 	return 0;
 }

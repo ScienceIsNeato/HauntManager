@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include <memory>
 #include "../include/rplidar/rplidar.h" //RPLIDAR standard sdk, all-in-one header
 
 #define NUM_SAMPLE_POINTS 8192
