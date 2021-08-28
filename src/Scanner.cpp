@@ -338,10 +338,10 @@ bool Scanner::ShouldProcess(double angle, double distance)
 	bool should_process = true;
 	for (auto & dead_zone : _dead_zones) 
 	{
-		if ((distance >= dead_zone.start_distance) &&
-			(distance <= dead_zone.end_distance) &&
-			(angle >= dead_zone.start_angle) &&
-			(angle <= dead_zone.end_angle))
+		if ((distance >= dead_zone->start_distance) &&
+			(distance <= dead_zone->end_distance) &&
+			(angle >= dead_zone->start_angle) &&
+			(angle <= dead_zone->end_angle))
 		{
 			should_process = false;
 		}
@@ -350,28 +350,28 @@ bool Scanner::ShouldProcess(double angle, double distance)
 }
 
 // Create a region for which measurements should be ignored
-void Scanner::AddDeadZone(DeadZone dead_zone)
+void Scanner::AddDeadZone(std::shared_ptr<DeadZone> dead_zone)
 {
 	// Basic validation
-	if (dead_zone.start_angle > dead_zone.end_angle)
+	if (dead_zone->start_angle > dead_zone->end_angle)
 	{
 		std::cout << "\nInvalid dead zone. Start angle must be smaller than end angle.\n";
 		return;
 	}
 
-	if (dead_zone.start_distance > dead_zone.end_distance)
+	if (dead_zone->start_distance > dead_zone->end_distance)
 	{
 		std::cout << "\nInvalid dead zone. Start distance must be smaller than end distance.\n";
 		return;
 	}
 
-	if ((dead_zone.start_angle > 360.0) || (dead_zone.start_angle < 0))
+	if ((dead_zone->start_angle > 360.0) || (dead_zone->start_angle < 0))
 	{
 		std::cout << "\nInvalid dead zone. Start angle must be between 0 and 360 degrees.\n";
 		return;
 	}
 
-	if ((dead_zone.end_angle > 360.0) || (dead_zone.end_angle < 0))
+	if ((dead_zone->end_angle > 360.0) || (dead_zone->end_angle < 0))
 	{
 		std::cout << "\nInvalid dead zone. End angle must be between 0 and 360 degrees.\n";
 		return;

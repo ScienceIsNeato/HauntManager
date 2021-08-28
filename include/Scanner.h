@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include <memory>
 #include "../include/rplidar/rplidar.h" //RPLIDAR standard sdk, all-in-one header
 
 #define NUM_SAMPLE_POINTS 8192
@@ -74,10 +75,10 @@ public:
 	bool ShouldProcess(double angle, double distance);
 
 	// Create a region for which measurements should be ignored
-	void AddDeadZone(DeadZone dead_zone);
+	void AddDeadZone(std::shared_ptr<DeadZone> dead_zone);
 
 private:
-	std::vector<DeadZone> _dead_zones;
+	std::vector<std::shared_ptr<DeadZone>> _dead_zones;
 };
 
 #endif // __SCANNER_H__

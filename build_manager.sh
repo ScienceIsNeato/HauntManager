@@ -1,5 +1,5 @@
 echo "Building haunt manager binary..."
-g++ -std=c++0x -Wall -pthread -o haunt_manager src/rplidar/net_socket.cpp src/rplidar/net_serial.cpp src/rplidar/thread.cpp src/rplidar/timer.cpp src/main.cpp src/Manager.cpp src/pigpioServo.cpp src/Scanner.cpp src/rplidar/rplidar_driver.cpp src/Ghoul.cpp -lpigpio -lrt
+g++ -std=c++0x -Wall -pthread -o haunt_manager src/rplidar/net_socket.cpp src/rplidar/net_serial.cpp src/rplidar/thread.cpp src/rplidar/timer.cpp src/main.cpp src/Manager.cpp src/pigpioServo.cpp src/Scanner.cpp src/rplidar/rplidar_driver.cpp src/Ghoul.cpp src/ConfigParser.cpp -lpigpio -lrt
 
 if [ $? -eq 0 ]; then
     echo "Successfully built 'haunt_manager'"

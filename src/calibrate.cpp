@@ -55,7 +55,10 @@ void printWelcomeStatement()
 	std::cout << "                       | /                        \n";
 	std::cout << " (max)  180°--------(SERVO)----------0° (min)     \n";
 	std::cout << "                       |                          \n";
-	std::cout << "                     (You) - (behind servo)       \n";
+	std::cout << "                     (You) - (behind servo)       \n\n";
+
+	std::cout << "Also, If you are calibrating a vertical servo, just \n";
+	std::cout << "use 'max' as the 'awake' position and 'min' as the 'asleep' position\n";
 
 	std::cout << "Press CNTRL + C now if you're worried. Otherwise, let's go!\n\n";
 }
