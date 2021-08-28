@@ -15,8 +15,7 @@ class Ghoul
 		- a name
 		- a horizontal servo
 		- a vertical servo
-		- Left eye
-		- Right Eye
+		- eyes (LEDs)
 	*/
 	private:
 		std::string _name;
@@ -24,8 +23,7 @@ class Ghoul
 		ServoConfig *_vert_servo_config;
 		std::shared_ptr<pigpioServo> _horiz_servo;
 		std::shared_ptr<pigpioServo> _vert_servo;
-		int _left_eye_gpio_pin;
-		int _right_eye_gpio_pin;
+		int _eyes_gpio_pin;
 		int _state; // awake or asleep
 		double _blink_duration;
 		double _blink_frequency;
@@ -42,16 +40,13 @@ class Ghoul
 		void SetVertServo(ServoConfig *servo);
 		std::shared_ptr<pigpioServo> GetHorizServo();
 		std::shared_ptr<pigpioServo> GetVertServo();
-		void SetLeftEye(int pin);
-		void SetRightEye(int pin);
+		void SetEyes(int pin);
 		bool Ready();
 
 		std::string GetName();
 		ServoConfig* GetHorizServoConfig();
 		ServoConfig* GetVertServoConfig();
-		int GetLeftEye();
-		int GetRightEye();
-
+		int GetEyes();
 		void OpenEyes();
 		void CloseEyes();
 		void BlinkEyes();

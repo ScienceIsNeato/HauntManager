@@ -17,8 +17,7 @@ Ghoul::Ghoul(std::string name)
 	_name = name;
 	_horiz_servo = nullptr;
 	_vert_servo = nullptr;
-	_left_eye_gpio_pin = 0;
-	_right_eye_gpio_pin = 0;
+	_eyes_gpio_pin = 0;
 
 	 // Default durations for various states (all times in seconds)
 	_blink_duration = 0.5;
@@ -64,16 +63,10 @@ void Ghoul::SetVertServo(ServoConfig *servo_config)
 												 servo_config->offsets);
 }
 
-void Ghoul::SetLeftEye(int pin)
+void Ghoul::SetEyes(int pin)
 {
-	_left_eye_gpio_pin = pin;
-	gpioSetMode(_left_eye_gpio_pin, PI_OUTPUT);
-}
-
-void Ghoul::SetRightEye(int pin)
-{
-	_right_eye_gpio_pin = pin;
-	gpioSetMode(_right_eye_gpio_pin, PI_OUTPUT);
+	_eyes_gpio_pin = pin;
+	gpioSetMode(_eyes_gpio_pin, PI_OUTPUT);
 }
 
 std::shared_ptr<pigpioServo> Ghoul::GetHorizServo()
@@ -102,14 +95,9 @@ ServoConfig* Ghoul::GetVertServoConfig()
 	return _vert_servo_config;
 }
 
-int Ghoul::GetLeftEye()
+int Ghoul::GetEyes()
 {
-	return _left_eye_gpio_pin;
-}
-
-int Ghoul::GetRightEye()
-{
-	return _right_eye_gpio_pin;
+	return _eyes_gpio_pin;
 }
 
 /********* STATE MACHINE **********/
@@ -124,19 +112,14 @@ bool Ghoul::Ready()
 	{
 		std::cout << "Ghoul: " << _name << " doesn't have vertical servo set. Not ready." << std::endl;
 	}
-	else if (_left_eye_gpio_pin == 0)
+	else if (_eyes_gpio_pin == 0)
 	{
-		std::cout << "Ghoul: " << _name << " doesn't have left eye pin set. Not ready." << std::endl;
-	}
-	else if (_right_eye_gpio_pin == 0)
-	{
-		std::cout << "Ghoul: " << _name << " doesn't have right eye pin set. Not ready." << std::endl;
+		std::cout << "Ghoul: " << _name << " doesn't have gpio pin set for eyes. Not ready." << std::endl;
 	}
 	else
 	{
 		std::cout << "Ghoul: " << _name << " is ready to spook!";
-		gpioSetMode(_left_eye_gpio_pin, PI_OUTPUT);
-		gpioSetMode(_right_eye_gpio_pin, PI_OUTPUT);
+		gpioSetMode(_eyes_gpio_pin, PI_OUTPUT);
 		GoToSleep();
 		return true;
 	}
@@ -146,14 +129,12 @@ bool Ghoul::Ready()
 
 void Ghoul::OpenEyes()
 {
-	Manager::ToggleLED(_left_eye_gpio_pin, LED_ON);
-	Manager::ToggleLED(_right_eye_gpio_pin, LED_ON);
+	Manager::ToggleLED(_eyes_gpio_pin, LED_ON);
 }
 
 void Ghoul::CloseEyes()
 {
-	Manager::ToggleLED(_left_eye_gpio_pin, LED_OFF);
-	Manager::ToggleLED(_right_eye_gpio_pin, LED_OFF);
+	Manager::ToggleLED(_eyes_gpio_pin, LED_OFF);
 }
 
 void Ghoul::BlinkEyes()
