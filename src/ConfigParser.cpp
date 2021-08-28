@@ -146,13 +146,9 @@ bool ConfigParser::ReadConfig(std::vector<Ghoul*> &ghouls)
 				current_config->is_horizontal = false;
 			}
 		}
-		else if(key == "left_eye_pin")
+		else if(key == "eyes_pin")
 		{
-			current_ghoul->SetLeftEye(atoi(val.c_str()));
-		}
-		else if(key == "right_eye_pin")
-		{
-			current_ghoul->SetRightEye(atoi(val.c_str()));
+			current_ghoul->SetEyes(atoi(val.c_str()));
 		}
 		else
 		{
@@ -191,6 +187,5 @@ void ConfigParser::PrintConfig(Ghoul* ghoul)
 	std::cout << "\n    center.pulse_width: " << ghoul->GetVertServoConfig()->angle_maps.center_map.pulse_width;
 	std::cout << "\n    awake_pulse_width:  " << ghoul->GetVertServoConfig()->angle_maps.max_map.pulse_width << std::endl;
 
-	std::cout << "\n  Left Eye LED Pin:     " << ghoul->GetLeftEye();
-	std::cout << "\n  Right Eye LED Pin:    " << ghoul->GetRightEye() << std::endl;
+	std::cout << "\n  Eyes LED Pin:         " << ghoul->GetEyes() << std::endl;;
 }
