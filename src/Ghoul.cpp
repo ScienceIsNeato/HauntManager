@@ -205,6 +205,10 @@ void Ghoul::WakeUp()
 
 void Ghoul::GoToSleep()
 {
+	// Center the horizontal one
+	_horiz_servo->TurnToAngle(_horiz_servo_config->angle_maps.center_map.angle);
+
+	// lower the vertical one
 	_vert_servo->TurnToAngle(_vert_servo_config->angle_maps.min_map.angle);
 	CloseEyes();
 	gettimeofday(&_time_fell_asleep, 0);
@@ -270,7 +274,8 @@ void Ghoul::Track(double distance, double angle)
 
 		printf("\nGHOUL: %s rel_angle: %4.1f°/", _name.c_str(), rel_angle);
 
-		_horiz_servo->TurnToAngle(rel_angle);
+		// Ghoul is 'backwards' wRt sensor, so need to flip this angle by 180
+		_horiz_servo->TurnToAngle(180 - rel_angle);
 	}
 }
 
