@@ -28,6 +28,12 @@ Ghoul::Ghoul(std::string name)
 	gettimeofday(&_last_time_awake, 0);
 	_state = ASLEEP;
 
+	// default motion detection vector to all false
+	for (int i = 0; i < CONT_WAKE_EVENTS; i++)
+	{
+		_recent_events.push_front(false);
+	}
+
 	if (gpioInitialise() < 0)
 	{
 		std::cout << "\nError initializing gpio for ghoul " << _name << ".\n" << std::flush;
@@ -120,6 +126,14 @@ bool Ghoul::Ready()
 	{
 		std::cout << "Ghoul: " << _name << " is ready to spook!";
 		gpioSetMode(_eyes_gpio_pin, PI_OUTPUT);
+
+		// Upon start, show full range of motion
+		WakeUp();
+		time_sleep(0.5);
+		GetHorizServo()->TurnToAngle(_horiz_servo_config->angle_maps.min_map.angle);
+		time_sleep(0.5);
+		GetHorizServo()->TurnToAngle(_horiz_servo_config->angle_maps.max_map.angle);
+		time_sleep(0.5);
 		GoToSleep();
 		return true;
 	}
@@ -168,6 +182,24 @@ bool Ghoul::ShouldWakeUp(bool motion_detected)
 		// Enough time has elapsed since we fell asleep. Ready to wake up now.
 		std::cout << "\nGhoul::ShouldWakeUp --> Elapsed: " << elapsed << ", Comparison:" << _min_time_to_wake << std::endl;
 		std::cout << "\nGhoul::ShouldWakeUp --> Returning True!!" << std::endl;
+
+		int required_events = CONT_WAKE_EVENTS;
+		int events_found = 0;
+
+		for(std::queue<bool>::size_type i = 0; i != _recent_events.size(); i++)
+		{
+			if (_recent_events[i] == true)
+			{
+				events_found++;
+			}
+		}
+
+		if (events_found < required_events)
+		{
+			std::cout << "\nGhoul::ShouldWakeUp --> Not waking up. Only got : " << events_found <<
+			" out of " << required_events << " continuous events." << std::endl;
+			return false;
+		}
 		return true;
 	}
 
@@ -218,8 +250,13 @@ void Ghoul::GoToSleep()
 void Ghoul::ProcessEvent(double distance, double angle, bool motion_found)
 {
 	// Receive the angle and distance to the closest moving object.
+
+	// First record whether or not motion detected
+	_recent_events.pop_back();
+	_recent_events.push_front(motion_found);
 	// First, determine if we should pay any attention to the event. If not, return.
 	// If so, pass to tracker.
+
 	if(_state == ASLEEP)
 	{
 		std::cout << "S";

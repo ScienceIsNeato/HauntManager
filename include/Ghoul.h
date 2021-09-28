@@ -4,8 +4,10 @@
 #include "../include/pigpioServo.h"
 #include <memory>
 #include <ctime>
+#include <queue>
 #include <unistd.h>
 #include <sys/time.h>
+
 
 enum {AWAKE = 0, ASLEEP =1};
 
@@ -32,6 +34,10 @@ class Ghoul
 
 		timeval _last_time_awake;
 		timeval _time_fell_asleep;
+
+		// Number of continuous motion detection events needed to wake
+		const static int CONT_WAKE_EVENTS = 10;
+		std::deque<bool> _recent_events; // True if motion detected, false if not FILO queue
 
 	public:
 		Ghoul(std::string name);
